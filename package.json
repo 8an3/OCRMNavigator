@@ -1,9 +1,13 @@
 {
-  "publisher": "theOpinionated",
+  "publisher": "skyler",
   "name": "ocrmnavigator",
   "displayName": "OCRMNavigator",
   "description": "",
-  "version": "1.0.1",
+  "version": "1.0.3",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:8an3/OCRMNavigator.git"
+  },
   "engines": {
     "vscode": "^1.98.0"
   },
@@ -17,23 +21,63 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
-   "commands": [
-  {
-    "command": "opinionatedCrm.editConfig",
-    "title": "Edit Navigator Config",
-    "icon": "$(edit)"
-  },
-  {
-    "command": "opinionatedCrm.revealInExplorer",
-    "title": "Reveal in Explorer",
-    "icon": "$(file-directory)"
-  },
-  {
-    "command": "opinionatedCrm.copyPath",
-    "title": "Copy Path",
-    "icon": "$(clippy)"
-  }
-],
+    "commands": [
+      {
+        "command": "opinionatedCrm.editConfig",
+        "title": "Edit Navigator Config",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "opinionatedCrm.revealInExplorer",
+        "title": "Reveal in Explorer",
+        "icon": "$(file-directory)"
+      },
+      {
+        "command": "opinionatedCrm.copyPath",
+        "title": "Copy Path",
+        "icon": "$(clippy)"
+      },
+      {
+        "command": "opinionatedCrm.addFileToNavigator",
+        "title": "Add to CRM Navigator",
+        "icon": "$(add)"
+      },
+      {
+        "command": "opinionatedCrm.editFileLabel",
+        "title": "Edit Label",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "opinionatedCrm.deleteFile",
+        "title": "Remove from Navigator",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "opinionatedCrm.moveCategoryUp",
+        "title": "Move Category Up",
+        "icon": "$(arrow-up)"
+      },
+      {
+        "command": "opinionatedCrm.moveCategoryDown",
+        "title": "Move Category Down",
+        "icon": "$(arrow-down)"
+      },
+      {
+        "command": "opinionatedCrm.addCategory",
+        "title": "Add Category",
+        "icon": "$(add)"
+      },
+      {
+        "command": "opinionatedCrm.renameCategory",
+        "title": "Rename Category",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "opinionatedCrm.deleteCategory",
+        "title": "Remove Category",
+        "icon": "$(trash)"
+      }
+    ],
     "views": {
       "explorer": [
         {
@@ -56,9 +100,61 @@
           "when": "view == opinionatedCrmNavigator",
           "group": "navigation"
         },
-         {
+        {
           "command": "opinionatedCrm.editConfig",
           "when": "view == opinionatedCrmNavigator && viewItem == missing",
+          "group": "navigation"
+        },
+        {
+          "command": "opinionatedCrm.revealInExplorer",
+          "when": "view == opinionatedCrmNavigator && viewItem != 'missing'",
+          "group": "inline"
+        },
+        {
+          "command": "opinionatedCrm.copyPath",
+          "when": "view == opinionatedCrmNavigator",
+          "group": "inline"
+        },
+        {
+          "command": "opinionatedCrm.editFileLabel",
+          "when": "view == opinionatedCrmNavigator && viewItem != 'category'",
+          "group": "1_modification"
+        },
+        {
+          "command": "opinionatedCrm.deleteFile",
+          "when": "view == opinionatedCrmNavigator && viewItem != 'category'",
+          "group": "1_modification"
+        },
+        {
+          "command": "opinionatedCrm.moveCategoryUp",
+          "when": "view == opinionatedCrmNavigator && viewItem == 'category'",
+          "group": "2_ordering@1"
+        },
+        {
+          "command": "opinionatedCrm.moveCategoryDown",
+          "when": "view == opinionatedCrmNavigator && viewItem == 'category'",
+          "group": "2_ordering@2"
+        },{
+          "command": "opinionatedCrm.addCategory",
+          "when": "view == opinionatedCrmNavigator",
+          "group": "navigation"
+        },
+        {
+          "command": "opinionatedCrm.renameCategory",
+          "when": "view == opinionatedCrmNavigator && viewItem == 'category'",
+          "group": "1_modification@1"
+        },
+        {
+          "command": "opinionatedCrm.deleteCategory",
+          "when": "view == opinionatedCrmNavigator && viewItem == 'category'",
+          "group": "1_modification@2"
+        }
+       
+      ],
+      "explorer/context": [
+        {
+          "command": "opinionatedCrm.addFileToNavigator",
+          "when": "resourceFilename",
           "group": "navigation"
         }
       ],

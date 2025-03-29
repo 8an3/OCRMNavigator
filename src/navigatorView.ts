@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 
-interface NavigatorConfig {
+export interface NavigatorConfig {
   categories: {
     label: string;
     expanded: boolean;
@@ -14,6 +14,7 @@ interface NavigatorConfig {
   }[];
 }
 
+
 export class NavigatorItem extends vscode.TreeItem {
   constructor(
     public readonly label: string,
@@ -23,6 +24,8 @@ export class NavigatorItem extends vscode.TreeItem {
   ) {
     super(label, collapsibleState);
 
+    this.contextValue = type;
+    
     if (type === 'file') {
       this.command = {
         command: 'vscode.open',
@@ -41,7 +44,7 @@ export class NavigatorProvider implements vscode.TreeDataProvider<NavigatorItem>
   private _onDidChangeTreeData: vscode.EventEmitter<NavigatorItem | undefined | null | void> = new vscode.EventEmitter<NavigatorItem | undefined | null | void>();
   readonly onDidChangeTreeData: vscode.Event<NavigatorItem | undefined | null | void> = this._onDidChangeTreeData.event;
   private firstItem: NavigatorItem | undefined;
-  private config: NavigatorConfig | null = null;
+  public config: NavigatorConfig | null = null;
   private configWatcher: vscode.FileSystemWatcher;
 
   constructor(
