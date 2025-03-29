@@ -532,6 +532,74 @@ export function activate(context: vscode.ExtensionContext) {
                 vscode.window.showErrorMessage(`Failed to delete category: ${error instanceof Error ? error.message : String(error)}`);
             }
         }),
+        // export config from file
+        vscode.commands.registerCommand('opinionatedCrm.exportConfig', async () => {
+            try {
+                if (!workspaceRoot) {
+                    vscode.window.showErrorMessage('No workspace folder open');
+                    return;
+                }
+
+                const targetPath = path.join(workspaceRoot, 'navigator-config.json');
+
+                // Check if file already exists
+                if (fs.existsSync(targetPath)) {
+                    const overwrite = await vscode.window.showQuickPick(
+                        ['Overwrite', 'Cancel'],
+                        { placeHolder: 'Config file already exists in workspace. Overwrite?' }
+                    );
+
+                    if (overwrite !== 'Overwrite') {
+                        return;
+                    }
+                }
+
+                // Copy config file
+                fs.copyFileSync(configPath, targetPath);
+                vscode.window.showInformationMessage(`Config exported to ${targetPath}`);
+
+                // Open the exported file
+                const doc = await vscode.workspace.openTextDocument(targetPath);
+                await vscode.window.showTextDocument(doc);
+            } catch (error) {
+                vscode.window.showErrorMessage(`Export failed: ${error instanceof Error ? error.message : String(error)}`);
+            }
+        }),
+        // Import config from file
+        vscode.commands.registerCommand('opinionatedCrm.importConfig', async () => {
+            try {
+                const fileUris = await vscode.window.showOpenDialog({
+                    canSelectMany: false,
+                    openLabel: 'Import',
+                    filters: { 'JSON Files': ['json'] }
+                });
+
+                if (!fileUris || fileUris.length === 0) {
+                    return;
+                }
+
+                const sourcePath = fileUris[0].fsPath;
+                const content = fs.readFileSync(sourcePath, 'utf8');
+
+                // Validate JSON
+                JSON.parse(content); // Will throw if invalid
+
+                // Backup current config
+                if (fs.existsSync(configPath)) {
+                    const backupPath = configPath + '.bak';
+                    fs.copyFileSync(configPath, backupPath);
+                }
+
+                // Copy new config
+                fs.copyFileSync(sourcePath, configPath);
+
+                // Reload
+                navigatorProvider.loadConfig();
+                vscode.window.showInformationMessage('Config imported successfully!');
+            } catch (error) {
+                vscode.window.showErrorMessage(`Import failed: ${error instanceof Error ? error.message : String(error)}`);
+            }
+        }),
         view,
         {
             dispose: () => view.dispose()
@@ -546,6 +614,20 @@ export function activate(context: vscode.ExtensionContext) {
     statusBarItem.show();
     context.subscriptions.push(statusBarItem);
 
+    const exportButton = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right);
+    exportButton.text = "$(arrow-down)";
+    exportButton.tooltip = "Export configuration";
+    exportButton.command = 'opinionatedCrm.exportConfig';
+    context.subscriptions.push(exportButton);
+    
+    const importButton = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right);
+    importButton.text = "$(arrow-up)";
+    importButton.tooltip = "Import configuration";
+    importButton.command = 'opinionatedCrm.importConfig';
+    context.subscriptions.push(importButton);
+    
+    // Add them to the view title
+    view.title = "F/F Navigator";
     // Ensure view is visible
     setTimeout(() => {
         if (!view.visible) {

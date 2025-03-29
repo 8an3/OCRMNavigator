@@ -24,7 +24,7 @@
     "commands": [
       {
         "command": "opinionatedCrm.editConfig",
-        "title": "Edit Navigator Config",
+        "title": "Edit Navigator Config .json",
         "icon": "$(edit)"
       },
       {
@@ -76,6 +76,16 @@
         "command": "opinionatedCrm.deleteCategory",
         "title": "Remove Category",
         "icon": "$(trash)"
+      },
+      {
+        "command": "opinionatedCrm.exportConfig",
+        "title": "Export Config",
+        "icon": "$(arrow-down)"
+      },
+      {
+        "command": "opinionatedCrm.importConfig",
+        "title": "Import Config",
+        "icon": "$(arrow-up)"
       }
     ],
     "views": {
@@ -134,10 +144,11 @@
           "command": "opinionatedCrm.moveCategoryDown",
           "when": "view == opinionatedCrmNavigator && viewItem == 'category'",
           "group": "2_ordering@2"
-        },{
+        },
+        {
           "command": "opinionatedCrm.addCategory",
           "when": "view == opinionatedCrmNavigator",
-          "group": "navigation"
+          "group": "1_modification@1"
         },
         {
           "command": "opinionatedCrm.renameCategory",
@@ -149,7 +160,6 @@
           "when": "view == opinionatedCrmNavigator && viewItem == 'category'",
           "group": "1_modification@2"
         }
-       
       ],
       "explorer/context": [
         {
@@ -164,6 +174,24 @@
           "when": "view == opinionatedCrmNavigator",
           "group": "navigation",
           "icon": "$(edit)"
+        },
+        {
+          "command": "opinionatedCrm.exportConfig",
+          "when": "view == opinionatedCrmNavigator",
+          "group": "navigation@2",
+          "icon": "$(export)"
+        },
+        {
+          "command": "opinionatedCrm.importConfig",
+          "when": "view == opinionatedCrmNavigator",
+          "group": "navigation@2",
+          "icon": "$(import)"
+        },
+        {
+          "command": "opinionatedCrm.addCategory",
+          "when": "view == opinionatedCrmNavigator",
+          "group": "navigation@3",
+          "icon": "$(add)"
         }
       ]
     }

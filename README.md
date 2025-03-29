@@ -25,6 +25,10 @@ A VS Code extension for managing CRM-related files with custom categorization an
 - Keyboard shortcuts for common actions
 - Visual tree view in Explorer panel
 
+### Quick Access
+- Copy config file to current root folder
+- Upload configuration file
+
 ## Installation
 
 ### From VS Marketplace
