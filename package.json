@@ -1,0 +1,95 @@
+{
+  "publisher": "theOpinionated",
+  "name": "ocrmnavigator",
+  "displayName": "OCRMNavigator",
+  "description": "",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.98.0"
+  },
+  "$schema": "./navigator-config.schema.json",
+  "categories": [],
+  "activationEvents": [
+    "onCommand:opinionatedCrm.showNavigator",
+    "onCommand:opinionatedCrm.refreshNavigator",
+    "onCommand:opinionatedCrm.editConfig",
+    "onView:opinionatedCrmNavigator"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+   "commands": [
+  {
+    "command": "opinionatedCrm.editConfig",
+    "title": "Edit Navigator Config",
+    "icon": "$(edit)"
+  },
+  {
+    "command": "opinionatedCrm.revealInExplorer",
+    "title": "Reveal in Explorer",
+    "icon": "$(file-directory)"
+  },
+  {
+    "command": "opinionatedCrm.copyPath",
+    "title": "Copy Path",
+    "icon": "$(clippy)"
+  }
+],
+    "views": {
+      "explorer": [
+        {
+          "id": "opinionatedCrmNavigator",
+          "name": "CRM Navigator",
+          "icon": "$(list-tree)",
+          "when": "workspaceFolderCount >= 1"
+        }
+      ]
+    },
+    "menus": {
+      "view/item/context": [
+        {
+          "command": "opinionatedCrm.revealInExplorer",
+          "when": "view == opinionatedCrmNavigator",
+          "group": "navigation"
+        },
+        {
+          "command": "opinionatedCrm.copyPath",
+          "when": "view == opinionatedCrmNavigator",
+          "group": "navigation"
+        },
+         {
+          "command": "opinionatedCrm.editConfig",
+          "when": "view == opinionatedCrmNavigator && viewItem == missing",
+          "group": "navigation"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "opinionatedCrm.editConfig",
+          "when": "view == opinionatedCrmNavigator",
+          "group": "navigation",
+          "icon": "$(edit)"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package --no-dependencies",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.98.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "20.x",
+    "@typescript-eslint/eslint-plugin": "^8.28.0",
+    "@typescript-eslint/parser": "^8.28.0",
+    "eslint": "^9.23.0",
+    "typescript": "^5.8.2",
+    "@vscode/test-cli": "^0.0.10",
+    "@vscode/test-electron": "^2.4.1"
+  }
+}

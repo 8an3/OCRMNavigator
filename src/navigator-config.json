@@ -1,0 +1,101 @@
+  {
+    "categories": [
+      {
+        "label": "DASHBOARDS",
+        "expanded": true,
+        "items": [
+          {
+            "label": "Admin Dashboard",
+            "path": "apps/app/app/routes/portal/$dept/settings/general.tsx"
+          },
+          {
+            "label": "Client Dashboard",
+            "path": "apps/app/app/routes/client/portal/sales/dashboard.tsx"
+          },
+          {
+            "label": "Dev Dashboard",
+            "path": "apps/app/app/routes/portal/dev/dashboard/home.tsx"
+          },
+          {
+            "label": "PAC Dashboard",
+            "path": "apps/app/app/routes/portal/accessories/dashboard.tsx"
+          },
+          {
+            "label": "Service Dashboard",
+            "path": "apps/app/app/routes/portal/service/dashboard.tsx"
+          },
+          {
+            "label": "Sales Dashboard",
+            "path": "apps/app/app/routes/portal/sales/dashboard/clients.tsx"
+          },
+          {
+            "label": "User Dashboard",
+            "path": "apps/app/app/routes/portal/user/dashboard.settings.tsx"
+          }
+        ]
+      },
+      {
+        "label": "RELATED LINKS",
+        "expanded": false,
+        "items": [
+          {
+            "label": "client.website",
+            "path": "apps/app/app/routes/dealer/client/home.tsx"
+          },
+          {
+            "label": "unit.file",
+            "path": "apps/app/app/routes/portal/sales/customer/$clientId/$financeId.tsx"
+          }
+        ]
+      },
+      {
+        "label": "COMPONENTS",
+        "expanded": false,
+        "items": [
+          {
+            "label": "app.sidebar",
+            "path": "apps/app/app/routes/__component/appSidebar.tsx"
+          },
+          {
+            "label": "components.shared",
+            "path": "apps/app/app/components/shared/shared.tsx"
+          },
+          {
+            "label": "unit.file",
+            "path": "apps/app/app/routes/dealer/client/home.tsx"
+          }
+        ]
+      },
+      {
+        "label": "UTILS",
+        "expanded": false,
+        "items": [
+          {
+            "label": "loader.server",
+            "path": "apps/app/app/utils/loader.server.tsx"
+          },
+          {
+            "label": "app.env",
+            "path": "apps/app/.env"
+          },
+          {
+            "label": "app.packageJSON",
+            "path": "apps/app/package.json"
+          },
+          {
+            "label": "app.schemaPrisma",
+            "path": "apps/app/prisma/schema.prisma"
+          },
+          {
+            "label": "app.seed",
+            "path": "apps/app/prisma/seed.ts"
+          },
+          {
+            "label": "meth.json",
+            "path": "meth.json"
+          }
+        ]
+      }
+    ]
+  }
+  
