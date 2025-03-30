@@ -13,11 +13,6 @@ A VS Code extension for bookmarking files, among other things. Bookmark file loc
 - .md files
 - Pre-made most used components and functions
 
-### Commands 
-### snippets 
-
-### Commands like show terminal collapese 1 2 3 4 unfold all save all
-
 ## Files
 ### File Management
 - Add files to custom categories
@@ -41,8 +36,6 @@ A VS Code extension for bookmarking files, among other things. Bookmark file loc
 - Copy config file to current root folder
 - Upload configuration file
 
-
-
 ## Installation
 
 ### From VS Marketplace
@@ -54,35 +47,6 @@ A VS Code extension for bookmarking files, among other things. Bookmark file loc
 ### From VSIX File(local installation):
 ```bash
 code --install-extension ocrm-navigator-0.0.1.vsix
-```
-From Marketplace (when published):
-
-```bash
-ext install ocrmnavigator
-```
-Configuration
-Create 
-```bash
-.vscode/navigator-config.json
-```
- in your project:
-
-```json
-Copy
-{
-  "categories": [
-    {
-      "label": "DASHBOARDS",
-      "expanded": true,
-      "items": [
-        {
-          "label": "Admin Dashboard",
-          "path": "apps/app/routes/portal/admin/dashboard.tsx"
-        }
-      ]
-    }
-  ]
-}
 ```
 
 ## Usage
@@ -106,37 +70,6 @@ Copy
 | `Move Category Up` | Reorder category position | `Alt+Up` |
 | `Move Category Down` | Reorder category position | `Alt+Down` |
 | `Remove Category` | Delete category and contents | Right-click category |
-
-## Configuration
-
-Edit `navigator-config.json` to customize your navigation structure:
-
-```json
-{
-  "categories": [
-    {
-      "name": "Client Documents",
-      "files": [
-        {"path": "docs/client-agreement.pdf", "label": "Agreement Template"},
-        {"path": "templates/proposal.docx", "label": "Proposal Draft"}
-      ]
-    },
-    {
-      "name": "Email Templates",
-      "files": [
-        {"path": "emails/welcome.html", "label": "Welcome Email"}
-      ]
-    }
-  ]
-}
-```
-## Keyboard Shortcuts
-
-| Action               | Shortcut                          |
-|----------------------|-----------------------------------|
-| Move Category Up     | `Alt + Up Arrow`                 |
-| Move Category Down   | `Alt + Down Arrow`               |
-| Edit Config          | `Ctrl+Shift+P` → "Edit Navigator Config" |
 
 ## Development
 

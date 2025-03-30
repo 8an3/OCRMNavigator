@@ -26,7 +26,7 @@ export interface NavigatorItem {
 
 export interface NavigatorCategoryItem extends NavigatorItem {
   readonly type: 'folder';
-  expanded: boolean;
+  expanded: boolean; 
   items: NavigatorItem[];
 }
 
