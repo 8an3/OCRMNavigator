@@ -18,7 +18,7 @@ export interface NavigatorItem {
   label: string;
   path?: string;
   cmd?: string;
-  type?: 'file' | 'url' | 'command' | 'category' | 'folder';
+  type?: 'file' | 'url' | 'command' | 'category' | 'folder' | 'md' | 'snippet';
   collapsibleState: vscode.TreeItemCollapsibleState;
   filePath: string;
   children?: NavigatorItem[];
@@ -26,7 +26,7 @@ export interface NavigatorItem {
 
 export interface NavigatorCategoryItem extends NavigatorItem {
   readonly type: 'folder';
-  expanded: boolean; 
+  expanded: boolean;
   items: NavigatorItem[];
 }
 
@@ -35,7 +35,7 @@ export class NavigatorItem extends vscode.TreeItem {
     public label: string,
     public collapsibleState: vscode.TreeItemCollapsibleState,
     public filePath: string = '',
-    public type?: 'file' | 'url' | 'command' | 'category' | 'folder',
+    public type?: 'file' | 'url' | 'command' | 'category' | 'folder' | 'md' | 'snippet',
     public hasChildren?: boolean,
   ) {
     super(label, collapsibleState);
@@ -48,6 +48,20 @@ export class NavigatorItem extends vscode.TreeItem {
         title: 'Open File'
       };
       this.iconPath = new vscode.ThemeIcon('file');
+    } else if (type === 'snippet') {
+      this.command = {
+        command: 'vscode.open',
+        arguments: [vscode.Uri.file(filePath)],
+        title: 'Open File'
+      };
+      this.iconPath = new vscode.ThemeIcon('symbol-snippet');
+    } else if (type === 'md') {
+      this.command = {
+        command: 'vscode.open',
+        arguments: [vscode.Uri.file(filePath)],
+        title: 'Open File'
+      };
+      this.iconPath = new vscode.ThemeIcon('markdown');
     } else if (type === 'url') {
       this.command = {
         command: 'vscode.open',
@@ -138,7 +152,7 @@ export class NavigatorProvider implements vscode.TreeDataProvider<NavigatorItem>
       const items = (this.config.categories || []).map(category => {
         return new NavigatorItem(
           category.label,
-          category.expanded?  vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed,
+          category.expanded ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed,
           '',
           'folder'
         );
@@ -164,7 +178,7 @@ export class NavigatorProvider implements vscode.TreeDataProvider<NavigatorItem>
 
             const navItem = new NavigatorItem(
               folderItem.label,
-              folderItem.expanded?  vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed,
+              folderItem.expanded ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed,
               folderItem.filePath || '',
               'folder',
               true
@@ -232,6 +246,22 @@ export class NavigatorProvider implements vscode.TreeDataProvider<NavigatorItem>
         pathOrCmd,
         'command'
       );
+    } else if (type === 'md') {
+      const item = new NavigatorItem(
+        label,
+        vscode.TreeItemCollapsibleState.None,
+        fullPath,
+        'md'
+      );
+      return item;
+    } else if (type === 'snippet') {
+      const item = new NavigatorItem(
+        label,
+        vscode.TreeItemCollapsibleState.None,
+        fullPath,
+        'snippet'
+      );
+      return item;
     } else if (type === 'folder' && items) {
       const folderItem = new NavigatorItem(
         label,

@@ -3,7 +3,7 @@
   "name": "ocrmnavigator",
   "displayName": "OCRMNavigator",
   "description": "",
-  "version": "1.0.6",
+  "version": "1.0.8",
   "repository": {
     "type": "git",
     "url": "git@github.com:8an3/OCRMNavigator.git"
@@ -26,14 +26,14 @@
         {
           "id": "ocrmnavigator",
           "title": "OCRM Navigator",
-          "icon": "menu.svg" 
+          "icon": "menu.svg"
         }
       ]
     },
     "commands": [
       {
         "command": "ocrmnavigator.editConfig",
-        "title": "Edit Navigator Config .json",
+        "title": "Edit .json Config",
         "category": "OCRM Navigator"
       },
       {
@@ -53,12 +53,12 @@
       },
       {
         "command": "ocrmnavigator.editFileLabel",
-        "title": "Edit Label",
+        "title": "Edit File Label",
         "category": "OCRM Navigator"
       },
       {
         "command": "ocrmnavigator.deleteItem",
-        "title": "Remove from Navigator",
+        "title": "Remove File",
         "category": "OCRM Navigator"
       },
       {
@@ -113,7 +113,7 @@
       },
       {
         "command": "ocrmnavigator.addSubcategory",
-        "title": "Add Subcategory",
+        "title": "Add Sub Folder",
         "category": "OCRM Navigator"
       },
       {
@@ -138,7 +138,7 @@
       },
       {
         "command": "ocrmnavigator.deleteSnippet",
-        "title": "Delete Snippet",
+        "title": "Remove Snippet",
         "category": "OCRM Navigator"
       },
       {
@@ -148,14 +148,14 @@
       },
       {
         "command": "ocrmnavigator.removeUrl",
-        "title": "Remove Url",
+        "title": "Remove URL",
         "category": "OCRM Navigator"
       },
       {
         "command": "ocrmnavigator.editCommand",
         "title": "Edit Command",
         "category": "OCRM Navigator"
-      }  ,
+      },
       {
         "command": "ocrmnavigator.removeCommand",
         "title": "Remove Command",
@@ -163,7 +163,7 @@
       },
       {
         "command": "ocrmnavigator.moveItem",
-        "title": "Move Item",
+        "title": "Move File Item",
         "category": "OCRM Navigator"
       },
       {
@@ -173,16 +173,44 @@
       },
       {
         "command": "ocrmnavigator.createMD",
-        "title": "Create MD",
+        "title": "Add .MD",
         "category": "OCRM Navigator"
-      }
-      ,
+      },
+      {
+        "command": "ocrmnavigator.createMDWCheat",
+        "title": "Add .MD With Cheat Sheet",
+        "category": "OCRM Navigator"
+      },
+      {
+        "command": "ocrmnavigator.editMD",
+        "title": "Edit .MD",
+        "category": "OCRM Navigator"
+      },
+      {
+        "command": "ocrmnavigator.editMDLabel",
+        "title": "Edit .MD Label",
+        "category": "OCRM Navigator"
+      },
+      {
+        "command": "ocrmnavigator.removeMD",
+        "title": "Remove .MD",
+        "category": "OCRM Navigator"
+      },
       {
         "command": "ocrmnavigator.editSnippet",
         "title": "Edit Snippet",
         "category": "OCRM Navigator"
+      },
+      {
+        "command": "ocrmnavigator.showCommandsReference",
+        "title": "Show VSCode Commands Reference",
+        "category": "OCRM Navigator"
+      },
+      {
+        "command": "ocrmnavigator.viewMarkdownGuide",
+        "title": "Show MD Cheat Sheet",
+        "category": "OCRM Navigator"
       }
-     
     ],
     "views": {
       "ocrmnavigator": [
@@ -199,134 +227,159 @@
       "view/item/context": [
         {
           "command": "ocrmnavigator.revealInExplorer",
-          "when": "view == ocrmnavigatorNavigator",
-          "group": "navigation"
+          "when": "view == ocrmnavigatorNavigator && viewItem == file && viewItem == url",
+          "group": "1_primary@1"
         },
         {
           "command": "ocrmnavigator.copyPath",
-          "when": "view == ocrmnavigatorNavigator",
-          "group": "navigation"
-        },
-        {
-          "command": "ocrmnavigator.revealInExplorer",
-          "when": "view == ocrmnavigatorNavigator && viewItem != 'missing'",
-          "group": "inline"
+          "when": "view == ocrmnavigatorNavigator && viewItem == file && viewItem == url",
+          "group": "1_primary@2"
         },
         {
           "command": "ocrmnavigator.editFileLabel",
-          "when": "view == ocrmnavigatorNavigator && viewItem != 'category'",
-          "group": "1_modification"
+          "when": "view == ocrmnavigatorNavigator && viewItem == file",
+          "group": "2_modification@1"
         },
         {
           "command": "ocrmnavigator.deleteItem",
-          "when": "view == ocrmnavigatorNavigator && viewItem != 'category' && viewItem != 'url'  && viewItem != 'command' ",
-          "group": "1_modification"
-        },
-        {
-          "command": "ocrmnavigator.editConfig",
-          "when": "view == ocrmnavigatorNavigator && viewItem == missing",
-          "group": "navigation"
-        },
-        {
-          "command": "ocrmnavigator.moveCategoryUp",
-          "when": "view == ocrmnavigatorNavigator && viewItem == 'category'",
-          "group": "2_ordering@1"
-        },
-        {
-          "command": "ocrmnavigator.moveCategoryDown",
-          "when": "view == ocrmnavigatorNavigator && viewItem == 'category'",
-          "group": "2_ordering@2"
+          "when": "view == ocrmnavigatorNavigator && viewItem == file",
+          "group": "2_modification@2"
         },
         {
           "command": "ocrmnavigator.addCategory",
           "when": "view == ocrmnavigatorNavigator",
-          "group": "1_modification@1"
+          "group": "3_category@1"
         },
         {
           "command": "ocrmnavigator.renameCategory",
-          "when": "view == ocrmnavigatorNavigator && viewItem == 'category'",
-          "group": "1_modification@1"
+          "when": "view == ocrmnavigatorNavigator && viewItem == folder",
+          "group": "3_category@2"
         },
         {
           "command": "ocrmnavigator.deleteCategory",
           "when": "view == ocrmnavigatorNavigator && viewItem == folder",
-         "group": "navigation"
-        },
-         {
-          "command": "ocrmnavigator.addSubcategory",
-          "when": "view == ocrmnavigatorNavigator && viewItem == category",
-          "group": "navigation"
+          "group": "3_category@3"
         },
         {
           "command": "ocrmnavigator.addSubcategory",
-          "when": "view == ocrmnavigatorNavigator && viewItem == allowed-category",
-          "group": "inline"
+          "when": "view == ocrmnavigatorNavigator && viewItem == folder",
+          "group": "4_subcategory@1"
         },
         {
           "command": "ocrmnavigator.expandFolder",
-          "when": "view == ocmnavigatorView && viewItem == folder",
-          "group": "navigation"
+          "when": "view == ocrmnavigatorNavigator && viewItem == folder",
+          "group": "4_subcategory@2"
         },
         {
           "command": "ocrmnavigator.collapseFolder",
-          "when": "view == ocmnavigatorView && viewItem == folder",
-          "group": "navigation"
+          "when": "view == ocrmnavigatorNavigator && viewItem == folder",
+          "group": "4_subcategory@3"
         },
-        
-
         {
           "command": "ocrmnavigator.addCommandToCategory",
-          "when": "view == ocrmnavigatorNavigator && viewItem == category",
-          "group": "navigation"
+          "when": "view == ocrmnavigatorNavigator && viewItem == category && viewItem == command",
+          "group": "5_commands@1"
         },
         {
           "command": "ocrmnavigator.editCommand",
           "when": "view == ocrmnavigatorNavigator && viewItem == command",
-          "group": "navigation"
+          "group": "5_commands@2"
         },
         {
           "command": "ocrmnavigator.removeCommand",
           "when": "view == ocrmnavigatorNavigator && viewItem == command",
-          "group": "navigation"
+          "group": "5_commands@3"
         },
-
-
+        {
+          "command": "ocrmnavigator.addUrlToNavigator",
+          "when": "view == ocrmnavigatorNavigator && viewItem == url && viewItem == folder",
+          "group": "6_urls@1"
+        },
         {
           "command": "ocrmnavigator.editWebUrl",
           "when": "view == ocrmnavigatorNavigator && viewItem == url",
-          "group": "1_modification"
+          "group": "6_urls@1"
         },
         {
           "command": "ocrmnavigator.removeUrl",
-          "when": "view == ocrmnavigatorNavigator && viewItem == 'url'",
-          "category": "OCRM Navigator"
-        } ,
+          "when": "view == ocrmnavigatorNavigator && viewItem == url",
+          "group": "6_urls@2"
+        },
         {
-          "command": "ocrmnavigator.createSnippet",
-          "when": "view == ocrmnavigatorNavigator && viewItem == category",
-          "group": "navigation"
+          "command": "ocrmnavigator.moveCategoryUp",
+          "when": "view == ocrmnavigatorNavigator && viewItem == filder",
+          "group": "2_ordering@1"
+        },
+        {
+          "command": "ocrmnavigator.moveCategoryDown",
+          "when": "view == ocrmnavigatorNavigator && viewItem == folder",
+          "group": "2_ordering@2"
         },
         {
           "command": "ocrmnavigator.moveItem",
-          "when": "view == ocrmnavigatorNavigator",
-          "group": "navigation@1"
+          "when": "view == ocrmnavigatorNavigator && viewItem == file && viewItem == url",
+          "group": "7_move@1"
         },
         {
           "command": "ocrmnavigator.setMoveTarget",
           "when": "view == ocrmnavigatorNavigator && viewItem == folder",
-          "group": "navigation@2"
+          "group": "7_move@2"
         },
         {
-          "command": "ocrmnavigator.createMD",
-          "when": "view == ocrmnavigatorNavigator && viewItem == category",
-          "group": "navigation"
+          "command": "ocrmnavigator.createSnippet",
+          "when": "view == ocrmnavigatorNavigator && viewItem == snippet && viewItem == folder",
+          "group": "8_snippets@1"
         },
         {
           "command": "ocrmnavigator.editSnippet",
+          "when": "view == ocrmnavigatorNavigator && viewItem == snippet",
+          "group": "8_snippets@2"
+        },
+        {
+          "command": "ocrmnavigator.deleteSnippet",
+          "when": "view == ocrmnavigatorNavigator && viewItem == snippet",
+          "group": "8_snippets@2"
+        },
+        {
+          "command": "ocrmnavigator.editConfig",
           "when": "view == ocrmnavigatorNavigator",
-          "group": "navigation"
+          "group": "9_config@1"
+        },
+        {
+          "command": "ocrmnavigator.editConfig",
+          "when": "view == ocrmnavigatorNavigator && viewItem == missing",
+          "group": "9_config@1"
+        },
+        {
+          "command": "ocrmnavigator.viewMarkdownGuide",
+          "when": "view == ocrmnavigatorNavigator && viewItem == md",
+          "group": "10_md@1"
+        } ,
+        {
+          "command": "ocrmnavigator.createMDWCheat",
+          "when": "view == ocrmnavigatorNavigator && viewItem == md",
+          "group": "10_md@1"
+        } ,
+        {
+          "command": "ocrmnavigator.createMD",
+          "when": "view == ocrmnavigatorNavigator && viewItem == md",
+          "group": "10_md@1"
+        } ,
+        {
+          "command": "ocrmnavigator.editMD",
+          "when": "view == ocrmnavigatorNavigator && viewItem == md",
+          "group": "10_md@1"
+        }  ,
+        {
+          "command": "ocrmnavigator.editMDLabel",
+          "when": "view == ocrmnavigatorNavigator && viewItem == md",
+          "group": "10_md@1"
+        },
+        {
+          "command": "ocrmnavigator.removeMD",
+          "when": "view == ocrmnavigatorNavigator && viewItem == md",
+          "group": "10_md@1"
         }
-     
       ],
       "explorer/context": [
         {
@@ -335,54 +388,74 @@
           "group": "navigation"
         }
       ],
-      "view/title": [
-        {
-          "command": "ocrmnavigator.addCategory",
-          "when": "view == ocrmnavigatorNavigator",
-          "group": "navigation@3",
-          "icon": "$(add)"
-        },
-        {
-          "command": "ocrmnavigator.addUrlToNavigator",
-          "when": "view == ocrmnavigatorNavigator",
-          "group": "navigation@3",
-          "icon": "$(link)"
-        },
-        {
-          "command": "ocrmnavigator.addCommandToCategory",
-          "when": "view == ocrmnavigatorNavigator",
-          "group": "navigation@3",
-          "icon": "$(terminal)"
-        },
-        {
-          "command": "ocrmnavigator.createSnippet",
-          "when": "view == ocrmnavigatorNavigator",
-          "group": "navigation@1"
-        },
-        {
-          "command": "ocrmnavigator.exportConfig",
-          "title": "Export Config",
-          "when": "view == ocrmnavigatorNavigator",
-          "group": "navigation@1"
-        },
-        {
-          "command": "ocrmnavigator.importConfig",
-          "title": "Import Config",
-          "when": "view == ocrmnavigatorNavigator",
-          "group": "navigation@1"
-        },
-        {
-          "command": "ocrmnavigator.editConfig",
-          "title": "Edit Config",
-          "when": "view == ocrmnavigatorNavigator",
-          "group": "navigation@1"
-        },
-        {
-          "command": "ocrmnavigator.refresh",
-          "when": "view == ocrmnavigatorNavigator",
-          "group": "navigation@3"
-        }
-      ]
+     "view/title": [
+    {
+        "command": "ocrmnavigator.addCategory",
+        "when": "view == ocrmnavigatorNavigator",
+        "group": "navigation@10",  
+        "icon": "$(add)"
+    },
+    {
+        "command": "ocrmnavigator.addUrlToNavigator",
+        "when": "view == ocrmnavigatorNavigator",
+        "group": "navigation@10",
+        "icon": "$(link)"
+    },
+    {
+        "command": "ocrmnavigator.addCommandToCategory",
+        "when": "view == ocrmnavigatorNavigator",
+        "group": "navigation@10",
+        "icon": "$(terminal)"
+    },
+    {
+        "command": "ocrmnavigator.createSnippet",
+        "when": "view == ocrmnavigatorNavigator",
+        "group": "navigation@11"
+    },
+    {
+        "command": "ocrmnavigator.createMD",
+        "when": "view == ocrmnavigatorNavigator",
+        "group": "navigation@11"
+    },
+    {
+        "command": "ocrmnavigator.createMDWCheat",
+        "when": "view == ocrmnavigatorNavigator",
+        "group": "navigation@11"
+    },
+    {
+        "command": "ocrmnavigator.exportConfig",
+        "title": "Export Config",
+        "when": "view == ocrmnavigatorNavigator",
+        "group": "navigation@12"
+    },
+    {
+        "command": "ocrmnavigator.importConfig",
+        "title": "Import Config",
+        "when": "view == ocrmnavigatorNavigator",
+        "group": "navigation@12"
+    },
+    {
+        "command": "ocrmnavigator.editConfig",
+        "title": "Edit Config",
+        "when": "view == ocrmnavigatorNavigator",
+        "group": "navigation@12"
+    },
+    {
+        "command": "ocrmnavigator.refresh",
+        "when": "view == ocrmnavigatorNavigator",
+        "group": "navigation@13"
+    },
+    {
+        "command": "ocrmnavigator.showCommandsReference",
+        "when": "view == ocrmnavigatorNavigator",
+        "group": "navigation@14"
+    },
+    {
+        "command": "ocrmnavigator.viewMarkdownGuide",
+        "when": "view == ocrmnavigatorNavigator",
+        "group": "navigation@14"
+    }
+]
     }
   },
   "scripts": {
