@@ -3,7 +3,7 @@
   "name": "ocrmnavigator",
   "displayName": "OCRMNavigator",
   "description": "",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "repository": {
     "type": "git",
     "url": "git@github.com:8an3/OCRMNavigator.git"
