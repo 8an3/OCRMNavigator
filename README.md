@@ -29,38 +29,42 @@ Turning a rather un-user-friendly experience, into something a lot better and gi
 Full but shortened example: 
 
 - COMMANDS
--  Save All
--  Format
--  Other CMDS ( Sub Folder )
+    - Save All
+    - Format
+    - Other CMDS ( Sub Folder )
 
 - FILES
--  Admin Dash
--  Client Dash
--  Dev Dash
-
+    - Admin Dash
+    - Client Dash
+    - Dev Dash
+  
 - RELATED FILES
--  Client Facing Website
--  Unit File 
+    - Client Facing Website
+    - Unit File 
 
 - COMPONENTS
--  App sidebar
--  Shared Components 
+    - App sidebar
+    - Shared Components 
+
+- FILES
+    - Client Facing Website
+    - Unit File 
 
 - WEB
--  site link
--  site link
+   - site link
+   - site link
 
 - SNIPPETS
--  User Auth
--  Toggle State
+   - User Auth
+   - Toggle State
 
 - TO DO
--  PRIORITY
--  BACKBURNER
+   - PRIORITY
+   - BACKBURNER
 
 - DEV MAP
--  .md file
--  .md file
+   - .md file
+   - .md file
 
 Along with some others but you get the idea... Never used to, but using 2 nav panes on either side feels good with this extension. As your commands are never too far to use, or too many clicks away.
   
@@ -103,56 +107,59 @@ That's it.
 If you want more...
 Need to organize a set of txt or md files, ( to do lists, docs, READMEs, notes, references, or whatever ) make one folder and put them all in that folder. While you use the pane for better organization. The extension uses a virtual filing system, so no matter where the files are, you can organize them as you wish in the extension.
 
-Dont waste my time creating something so complicated it takes half my day to learn it, for a tool that didnt even need to be that way. Only to find out it sucks, not only just to use ( from a user experience aspect ) but also crashes out everytime I'm about to use it. On the other end of the spectrum stop building tools that are just horrible. Just because you dont know how to do something, doesnt mean you cant learn. I didnt know how to do code anything in this extension when I started. Started with one goal in mind, a quick access file explorer. That obviously went down the rabbit hole. Wanting to fix every app I use, and hated using ( almost all of them, I'll get to the others later ). It's going to feel good deleting them, never to see them again. Also to whoever designed the snippets format, what the fuck were you smoking that day bud? Sorry, but geeze... we can tell it only took you a day to wrap up and ship it and went, 'fuck it... YEET!!'. Meanwhile, we are apparently forever stuck with this format. But hey atleast I figured out a workaround, that no other dev has thought of. Surprising, since this is my first year coding.
-
-Anyways... 
-Atleast have some pride in your work. For example, this will receive updates and changes as time goes on since I don't see myself coding without these features. There will also be more features added down the road.
-
 #### Comprehensive Breakdown
 
-***Add File*** - Right click on any file in the system to add to navigator.
-***Edit File*** Label - In extension pane, right click, select edit label.
-***Remove File*** - In extension pane, right click, select remove from navigator. 
-***Moving Files*** - Theres no drag and drop avaialble, so this is the next best thing.  In extension pane, right click, select move item. Right click on the destination folder, select as move destination.
-***Reveal in explorer*** - Available by inline and right click.
-***Copy Path*** - Right click.
+1. ***Add File*** - Right click on any file in the system to add to navigator.
+2. ***Edit File*** Label - In extension pane, right click, select edit label.
+3. **Remove File*** - In extension pane, right click, select remove from navigator. 
+4. ***Moving Files*** - Theres no drag and drop avaialble, so this is the next best thing.  
+   1. In extension pane, right click, select move item. 
+   2. Right click on the destination folder, select as move destination.
+5. ***Reveal in explorer*** - Available by inline and right click.
+6. ***Copy Path*** - Right click.
 
 Extensions filing system is virtual so the above will not actually be moved anywhere.
 
-***Add md*** - Dropdown menu + In extension pane, right click folder, select edit label. Create two windows, one for code editing the other for rendered md.
-***Add md With Cheat Sheet*** - Same as above, but also opens a third pane with a comprehensive cheet sheet, for all you cheaters.
-***Remove md*** - In extension pane, right click, select edit remove.
-***Edit md*** - In extension pane, right click, select edit edit. Create two windows, one for code editing the other for rendered md.
-***Edit md Label*** - In extension pane, right click, select edit label.
-***Show md Cheat Sheet*** - Dropdown menu.
+7. ***Add md*** - Dropdown menu + In extension pane, right click folder, select add md. 
+   1. Creates two windows, one for code editing.
+   2. The other for rendering the md file.
+8. ***Add md With Cheat Sheet*** - In extension pane, right click folder, select add md with cheat sheet. 
+   1. Creates three windows, one for code editing.
+   2. he other for rendering the md file.
+   3. Also opens a third pane with a comprehensive cheet sheet, for all you cheaters.
+9.  ***Remove md*** - In extension pane, right click, select remove md.
+10. ***Edit md*** - In extension pane, right click, select edit md. 
+    1.  Creates two windows, one for code editing the other for rendered md.
+11. ***Edit md Label*** - In extension pane, right click, select edit label.
+12. ***Show md Cheat Sheet*** - Dropdown menu.
 
-When adding md files, they will be added in a folder in your .vscode, but can be organized any way you want in the extension.
+When adding md files, they will be added in a folder in your .vscode for storage, but can be organized any way you want in the extension. This keeps your root directory looking clean, while giving you the organization you need. While at the same time you can retrieve those files painless at anytime.
 
-***Add Folder*** - Right click, almost anywhere and select add folder. Dropdown menu.
-***Add Sub-Folder*** - Right click on parent folder, select add sub folder.
-***Expand / Collapse Sub/Folder*** - Right click on parent folder, select add sub folder.
+13. ***Add Folder*** - Right click, almost anywhere and select add folder. Dropdown menu.
+14. ***Add Sub-Folder*** - Right click on parent folder, select add sub folder.
+15. ***Expand / Collapse Sub/Folder*** - Right click on parent folder, select add sub folder.
 
 Same as files above. Folders only go 2 deep. Didn't see the point of going further than that kinda defeats the purpose of this. With the thought in mind, first level are most used items you need, while the collapsed folders are the second most used, and the subfolder being the third. Each folder and be set to open expanded or collapsed as default.
 
-***Edit Config*** - Dropdown menu. Updates the config as you save.
-***Import Config*** - Dropdown menu. 
-***Export Config*** - Dropdown menu. Saves in projects root folder, and you didn't have to google and search 6 sites just to find out where you can get it from.
+16. ***Edit Config*** - Dropdown menu. Updates the config as you save.
+17. ***Import Config*** - Dropdown menu. 
+18. ***Export Config*** - Dropdown menu. Saves in projects root folder, and you didn't have to google and search 6 sites just to find out where you can get it from.
 
-***Add Snippet*** - Dropdown menu + In extension pane, right click folder, select edit label.
-***Edit Snippet*** - In extension pane, right click, select edit label.
-***Remove Snippet*** - In extension pane, right click, select remove snippet.
+19. ***Add Snippet*** - Dropdown menu + In extension pane, right click folder, select edit label.
+20. ***Edit Snippet*** - In extension pane, right click, select edit label.
+21. ***Remove Snippet*** - In extension pane, right click, select remove snippet.
 
-***Add URL*** - Dropdown menu + In extension pane, right click folder, select edit label.
-***Edit URL*** - In extension pane, right click, select edit label.
-***Remove URL*** - In extension pane, right click, select remove url.
+22. ***Add URL*** - Dropdown menu + In extension pane, right click folder, select edit label.
+23. ***Edit URL*** - In extension pane, right click, select edit label.
+24. ***Remove URL*** - In extension pane, right click, select remove url.
 
-***Add Command*** - Dropdown menu.
-***Remove Command*** - In extension pane, right click, select remove command.
-***Edit Command*** -
-***Show VSCodes Commands Reference*** - Dropdown menu.
+25. ***Add Command*** - Dropdown menu.
+26. ***Remove Command*** - In extension pane, right click, select remove command.
+27. ***Edit Command*** - In extension pane, right click, select edit command.
+28. ***Show VSCodes Commands Reference*** - Dropdown menu.
 
-***Refresh Navigator*** - Dropdown menu.
-***Collapse All*** - Dropdown menu.
+29. ***Refresh Navigator*** - Dropdown menu.
+30. ***Collapse All*** - Dropdown menu.
 
 ***To Note*** - Adding any type of item can also be done by right click the same type in the nav pane.
 
@@ -216,6 +223,10 @@ Open a Pull Request
 ###### Found an issue? Have a feature request?
 
 Open an Issue
+Dont waste my time creating something so complicated it takes half my day to learn it, for a tool that didnt even need to be that way. Only to find out it sucks, not only just to use ( from a user experience aspect ) but also crashes out everytime I'm about to use it. On the other end of the spectrum stop building tools that are just horrible. Just because you dont know how to do something, doesnt mean you cant learn. I didnt know how to do code anything in this extension when I started. Started with one goal in mind, a quick access file explorer. That obviously went down the rabbit hole. Wanting to fix every app I use, and hated using ( almost all of them, I'll get to the others later ). It's going to feel good deleting them, never to see them again. Also to whoever designed the snippets format, what the fuck were you smoking that day bud? Sorry, but geeze... we can tell it only took you a day to wrap up and ship it and went, 'fuck it... YEET!!'. Meanwhile, we are apparently forever stuck with this format. But hey atleast I figured out a workaround, that no other dev has thought of. Surprising, since this is my first year coding.
+
+Anyways... 
+Atleast have some pride in your work. For example, this will receive updates and changes as time goes on since I don't see myself coding without these features. There will also be more features added down the road.
 
 ### Enjoy organized navigation! 🚀
 
