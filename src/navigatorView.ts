@@ -3,28 +3,48 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 
-export interface NavigatorConfig {
+/**export interface NavigatorConfig {
   categories: {
-    label: string;
-    expanded: boolean;
-    items: {
-      label: string;
-      path: string;
+    filename?: string;
+    items?: {     
+      type?: 'file' | 'url' | 'command' | 'snippet'; // Optional if you want
     }[];
   }[];
+} */
+
+
+export interface NavigatorConfig {
+  categories: NavigatorCategoryItem[];
 }
 
+export interface NavigatorItem {
+  label: string;
+  path?: string;
+  cmd?: string;
+  type?: 'file' | 'url' | 'command' | 'category' | 'folder';
+  collapsibleState: vscode.TreeItemCollapsibleState;
+  filePath: string;
+  children?: NavigatorItem[];
+}
+
+export interface NavigatorCategoryItem extends NavigatorItem {
+  readonly type: 'category';
+  expanded: boolean;
+  items: NavigatorItem[];  // This can remain non-readonly if you need to modify it
+}
 
 export class NavigatorItem extends vscode.TreeItem {
   constructor(
-    public readonly label: string,
-    public readonly collapsibleState: vscode.TreeItemCollapsibleState,
-    public readonly filePath: string = '',
-    public readonly type: 'category' | 'file' = 'file'
+    public label: string,
+    public collapsibleState: vscode.TreeItemCollapsibleState,
+    public filePath: string = '',
+    public type?: 'file' | 'url' | 'command' | 'category' | 'folder',
+    public children?: NavigatorItem[]
   ) {
     super(label, collapsibleState);
 
-    this.contextValue = type;
+    this.contextValue = type || 'file';
+
     
     if (type === 'file') {
       this.command = {
@@ -32,14 +52,35 @@ export class NavigatorItem extends vscode.TreeItem {
         arguments: [vscode.Uri.file(filePath)],
         title: 'Open File'
       };
-      this.tooltip = filePath;
       this.iconPath = new vscode.ThemeIcon('file');
-    } else {
-      this.iconPath = new vscode.ThemeIcon('folder');
     }
+    else if (type === 'url') {
+      this.command = {
+        command: 'vscode.open',
+        arguments: [vscode.Uri.parse(filePath)],
+        title: 'Open URL'
+      };
+      this.iconPath = new vscode.ThemeIcon('link-external');
+    }
+    else if (type === 'command') {
+      this.command = {
+        command: 'ocrmnavigator.executeCommand',
+        arguments: [this],
+        title: 'Run: ' + label
+      };
+      this.iconPath = new vscode.ThemeIcon('terminal');
+    }
+    else if (type === 'category') {
+      this.iconPath = new vscode.ThemeIcon('folder');
+ 
+    }
+    else {
+      this.iconPath = new vscode.ThemeIcon('file');
+    }
+
+    this.tooltip = filePath || label;
   }
 }
-
 export class NavigatorProvider implements vscode.TreeDataProvider<NavigatorItem> {
   private _onDidChangeTreeData: vscode.EventEmitter<NavigatorItem | undefined | null | void> = new vscode.EventEmitter<NavigatorItem | undefined | null | void>();
   readonly onDidChangeTreeData: vscode.Event<NavigatorItem | undefined | null | void> = this._onDidChangeTreeData.event;
@@ -63,24 +104,33 @@ export class NavigatorProvider implements vscode.TreeDataProvider<NavigatorItem>
 
   public loadConfig() {
     try {
-        console.log('Loading config from:', this.configPath);
-        const configContent = fs.readFileSync(this.configPath, 'utf8');
-        
-        // Add validation here
-        const config = JSON.parse(configContent);
-        if (!config.categories || !Array.isArray(config.categories)) {
-            throw new Error('Invalid config format: missing categories array');
-        }
-        
-        this.config = config;
-        this.refresh();
+      console.log('Loading config from:', this.configPath);
+      const configContent = fs.readFileSync(this.configPath, 'utf8');
+      const config = JSON.parse(configContent) as NavigatorConfig;
+
+
+      if (!config.categories || !Array.isArray(config.categories)) {
+        throw new Error('Invalid config format: missing categories array');
+      }
+
+      // Validate commands in config
+      config.categories?.forEach(category => {
+        category.items?.forEach(item => {
+          if (item.type === 'command' && !item.cmd?.trim()) {
+            console.warn(`Empty command found in item: ${item.label}`);
+          }
+        });
+      });
+
+      this.config = config;
+      this.refresh();
     } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
-        console.error('Failed to load navigator config:', message);
-        vscode.window.showErrorMessage(`Config error: ${message}`);
-        this.config = null;
+      const message = err instanceof Error ? err.message : String(err);
+      console.error('Failed to load navigator config:', message);
+      vscode.window.showErrorMessage(`Config error: ${message}`);
+      this.config = null;
     }
-}
+  }
 
   getFirstItem(): NavigatorItem | undefined {
     return this.firstItem;
@@ -96,6 +146,10 @@ export class NavigatorProvider implements vscode.TreeDataProvider<NavigatorItem>
 
   getChildren(element?: NavigatorItem): Thenable<NavigatorItem[]> {
     console.log('getChildren called', element ? `for ${element.label}` : 'for root');
+
+    if (element?.children) {
+      return Promise.resolve(element.children);
+    }
 
     if (!this.workspaceRoot) {
       console.log('No workspace opened');
@@ -114,11 +168,13 @@ export class NavigatorProvider implements vscode.TreeDataProvider<NavigatorItem>
     }
 
     if (!element) {
-      // Root categories
-      const items = this.config.categories.map(category => {
+      // Root categories - ensure categories exists
+      const items = (this.config.categories || []).map(category => {
         return new NavigatorItem(
           category.label,
-          category.expanded ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed,
+          category.expanded ?
+            vscode.TreeItemCollapsibleState.Expanded :
+            vscode.TreeItemCollapsibleState.Collapsed,
           '',
           'category'
         );
@@ -131,11 +187,17 @@ export class NavigatorProvider implements vscode.TreeDataProvider<NavigatorItem>
       return Promise.resolve(items);
     }
 
-    // Find the category
-    const category = this.config.categories.find(c => c.label === element.label);
+    // Find the category with null checks
+    const category = this.config.categories?.find(c => c.label === element.label);
     if (category) {
+      // Handle case where items might be undefined
+      const categoryItems = category.items || [];
       return Promise.resolve(
-        category.items.map(item => this.createFileItem(item.label, item.path))
+        categoryItems.map(item => this.createFileItem(
+          item.label,
+          item.path || '',
+          item.type || 'file' // Explicitly pass undefined if type is not specified
+        ))
       );
     }
 
@@ -151,29 +213,91 @@ export class NavigatorProvider implements vscode.TreeDataProvider<NavigatorItem>
     }
   }
 
-  private createFileItem(label: string, relativePath: string): NavigatorItem {
-    const fullPath = path.join(this.workspaceRoot, relativePath);
-    const exists = fs.existsSync(fullPath);
-
-    const item = new NavigatorItem(
-      label,
-      vscode.TreeItemCollapsibleState.None,
-      fullPath
-    );
-
-  if (!exists) {
-    item.contextValue = 'missing';
-    item.iconPath = new vscode.ThemeIcon('warning');
-    item.tooltip = `File not found: ${fullPath}\nClick to edit config`;
-    item.command = {
-      command: 'opinionatedCrm.editConfig',
-      title: 'Fix Path in Config'
-    };
+  private createFileItem(label: string, pathOrCmd: string, type?: string): NavigatorItem {
+    if (!type) {
+      if (pathOrCmd.match(/^https?:\/\//)) type = 'url';
+      else if (pathOrCmd.match(/^[\w\.]+\.[\w\.]+$/)) type = 'file';
+      else type = 'command';
+    }
+  
+    const fullPath = path.join(this.workspaceRoot, pathOrCmd);
+  
+    // Handle directories
+    if (!type && fs.existsSync(fullPath) && fs.statSync(fullPath).isDirectory()) {
+      type = 'folder';
+    }
+  
+    if (type === 'url') {
+      return new NavigatorItem(
+        label,
+        vscode.TreeItemCollapsibleState.None,
+        pathOrCmd,
+        'url'
+      );
+    }
+    else if (type === 'command') {
+      return new NavigatorItem(
+        label,
+        vscode.TreeItemCollapsibleState.None,
+        pathOrCmd,
+        'command'
+      );
+    }
+    else if (type === 'folder') {
+      return new NavigatorItem(
+        label,
+        vscode.TreeItemCollapsibleState.Collapsed,
+        fullPath,
+        'folder',
+        this.getDirectoryItems(fullPath)  // Get children items
+      );
+    } 
+    else {
+      // File handling
+      const exists = fs.existsSync(fullPath);
+      const item = new NavigatorItem(
+        label,
+        vscode.TreeItemCollapsibleState.None,
+        fullPath,
+        'file'
+      );
+  
+      if (!exists) {
+        item.contextValue = 'missing';
+        item.iconPath = new vscode.ThemeIcon('warning');
+        item.tooltip = `File not found: ${fullPath}\nClick to edit config`;
+        item.command = {
+          command: 'ocrmnavigator.editConfig',
+          title: 'Fix Path in Config'
+        };
+      }
+  
+      return item;
+    }
   }
 
-  return item;
-}
-  dispose() {
-    this.configWatcher.dispose();
+
+  private getDirectoryItems(dirPath: string): NavigatorItem[] {
+    try {
+      if (!fs.existsSync(dirPath)) return [];
+  
+      return fs.readdirSync(dirPath).map(itemName => {
+        const itemPath = path.join(dirPath, itemName);
+        const isDirectory = fs.statSync(itemPath).isDirectory();
+        
+        return new NavigatorItem(
+          itemName,
+          isDirectory ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None,
+          itemPath,
+          isDirectory ? 'folder' : 'file',
+          isDirectory ? this.getDirectoryItems(itemPath) : undefined
+        );
+      });
+    } catch (error) {
+      console.error(`Error reading directory ${dirPath}:`, error);
+      return [];
+    }
   }
+  
+  dispose() { this.configWatcher.dispose(); }
 }

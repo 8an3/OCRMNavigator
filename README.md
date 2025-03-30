@@ -3,9 +3,21 @@
 [![Version](https://img.shields.io/badge/version-1.0.2-blue)](https://marketplace.visualstudio.com/items?itemName=skyler.ocrmnavigator)
 [![License](https://img.shields.io/badge/license-MIT-green)](https://github.com/8an3/OCRMNavigator/blob/main/LICENSE)
 
-A VS Code extension for managing CRM-related files with custom categorization and quick navigation.
+A VS Code extension for bookmarking files, among other things. Bookmark file locations to gain easy painless access to whatever file needed no matter how many folders deep they are. Categorize bookmarks however you see fit, whether by priority or category. Now also letting you bookmark urls for even quicker access to sites you visit the most while coding. Whether it be for refrencing apis or throwing on your next tune on youtube, all from your explorer pane.
 
 ## Features
+
+### Commands 
+### Commands 
+### Commands 
+### Commands 
+### Commands 
+### Commands 
+### Commands 
+### Commands 
+### snippets 
+select create snippet > input name of snippt > ask user to select snippet category to save under so under the snippets folder there will be another set of folders to save under to categorize the snippet or they can save in the main snippets folder > opens empty file to input the snippet > on save saves file
+### Commands like show terminal collapese 1 2 3 4 unfold all save all
 
 ### File Management
 - Add files to custom categories
@@ -25,9 +37,13 @@ A VS Code extension for managing CRM-related files with custom categorization an
 - Keyboard shortcuts for common actions
 - Visual tree view in Explorer panel
 
-### Quick Access
+### Easy Config Managment
 - Copy config file to current root folder
 - Upload configuration file
+
+### Web Links
+- Quickly add web links to navigator
+- Edit url links
 
 ## Installation
 

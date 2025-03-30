@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
-import { NavigatorProvider, NavigatorItem, NavigatorConfig } from './navigatorView';
+import { NavigatorProvider, NavigatorItem, NavigatorConfig, NavigatorCategoryItem } from './navigatorView';
 
 export function activate(context: vscode.ExtensionContext) {
     console.log('Extension activating...');
@@ -29,26 +29,58 @@ export function activate(context: vscode.ExtensionContext) {
         const defaultConfig = {
             "categories": [
                 {
+                    "label": "CMDS",
+                    "type": "category",
+                    "expanded": true,
+                    "items": [
+                        {
+                            "label": "Formatting",
+                            "type": "category",
+                            "items": [
+                                {
+                                    "label": "Format Document",
+                                    "cmd": "editor.action.formatDocument",
+                                    "type": "command"
+                                }
+                            ]
+                        },
+                        {
+                            "label": "Folding",
+                            "type": "category",
+                            "items": [
+                                {
+                                    "label": "Fold Level 1",
+                                    "cmd": "editor.foldLevel1",
+                                    "type": "command"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
                     "label": "DASHBOARDS",
                     "expanded": true,
                     "items": [
                         {
                             "label": "Admin Dashboard",
-                            "path": "apps/app/app/routes/portal/$dept/settings/general.tsx"
+                            "path": "apps/app/app/routes/portal/$dept/settings/general.tsx",
+                            "type": "file"
                         },
                         {
                             "label": "Client Dashboard",
-                            "path": "apps/app/app/routes/client/portal/sales/dashboard.tsx"
+                            "path": "apps/app/app/routes/client/portal/sales/dashboard.tsx",
+                            "type": "file"
                         }
                     ]
                 },
                 {
-                    "label": "RELATED LINKS",
+                    "label": "RELATED",
                     "expanded": false,
                     "items": [
                         {
                             "label": "client.website",
-                            "path": "apps/app/app/routes/dealer/client/home.tsx"
+                            "path": "apps/app/app/routes/dealer/client/home.tsx",
+                            "type": "file"
                         }
                     ]
                 },
@@ -58,7 +90,8 @@ export function activate(context: vscode.ExtensionContext) {
                     "items": [
                         {
                             "label": "app.sidebar",
-                            "path": "apps/app/app/routes/__component/appSidebar.tsx"
+                            "path": "apps/app/app/routes/__component/appSidebar.tsx",
+                            "type": "file"
                         }
                     ]
                 },
@@ -68,7 +101,40 @@ export function activate(context: vscode.ExtensionContext) {
                     "items": [
                         {
                             "label": "loader.server",
+                            "path": "apps/app/app/utils/loader.server.tsx",
+                            "type": "file"
+                        }
+                    ]
+                },
+                // copy snippet to clipboard when clicked
+                {
+                    "label": "SNIPPETS",
+                    "expanded": false,
+                    "items": [
+                        {
+                            "label": "loader.server",
                             "path": "apps/app/app/utils/loader.server.tsx"
+                        }
+                    ]
+                },
+                {
+                    "label": "WEB",
+                    "expanded": true,
+                    "items": [
+                        {
+                            "label": "localhost/somewhere",
+                            "path": "http://localhost:3000",
+                            "type": "url"
+                        },
+                        {
+                            "label": "Github",
+                            "path": "https://www.github.com",
+                            "type": "url"
+                        },
+                        {
+                            "label": "Vercel Dashboard",
+                            "path": "https://vercel.com/user",
+                            "type": "url"
                         }
                     ]
                 }
@@ -81,7 +147,7 @@ export function activate(context: vscode.ExtensionContext) {
     const navigatorProvider = new NavigatorProvider(workspaceRoot, configPath);
 
     // Register tree view
-    const view = vscode.window.createTreeView('opinionatedCrmNavigator', {
+    const view = vscode.window.createTreeView('ocrmnavigatorNavigator', {
         treeDataProvider: navigatorProvider,
         showCollapseAll: true
     });
@@ -90,7 +156,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(
         // edit json config in viewer
-        vscode.commands.registerCommand('opinionatedCrm.editConfig', async () => {
+        vscode.commands.registerCommand('ocrmnavigator.editConfig', async () => {
             try {
                 // Ensure config file exists
                 if (!fs.existsSync(configPath)) {
@@ -116,21 +182,21 @@ export function activate(context: vscode.ExtensionContext) {
             }
         }),
         // refresh nav
-        vscode.commands.registerCommand('opinionatedCrm.refreshNavigator', () => {
+        vscode.commands.registerCommand('ocrmnavigator.refreshNavigator', () => {
             navigatorProvider.loadConfig();
             vscode.window.showInformationMessage('Navigator refreshed');
         }),
         // reveal in file explorer
-        vscode.commands.registerCommand('opinionatedCrm.revealInExplorer', (item: NavigatorItem) => {
+        vscode.commands.registerCommand('ocrmnavigator.revealInExplorer', (item: NavigatorItem) => {
             vscode.commands.executeCommand('revealFileInOS', vscode.Uri.file(item.filePath));
         }),
         // copy path
-        vscode.commands.registerCommand('opinionatedCrm.copyPath', (item: NavigatorItem) => {
+        vscode.commands.registerCommand('ocrmnavigator.copyPath', (item: NavigatorItem) => {
             vscode.env.clipboard.writeText(item.filePath);
             vscode.window.showInformationMessage('Path copied to clipboard');
         }),
         // add file to nav
-        vscode.commands.registerCommand('opinionatedCrm.addFileToNavigator', async (fileUri: vscode.Uri) => {
+        vscode.commands.registerCommand('ocrmnavigator.addFileToNavigator', async (fileUri: vscode.Uri) => {
             try {
                 // If no URI was provided, try to get currently active file
                 if (!fileUri) {
@@ -164,6 +230,26 @@ export function activate(context: vscode.ExtensionContext) {
                     return; // User cancelled
                 }
 
+                // After getting userLabel, ask if this is a file or URL
+                const itemType = await vscode.window.showQuickPick(
+                    ['File', 'URL'],
+                    { placeHolder: 'Is this a file or web URL?' }
+                );
+
+                if (!itemType) return;
+
+                let pathOrUrl: string;
+                if (itemType === 'URL') {
+                    const url = await vscode.window.showInputBox({
+                        prompt: 'Enter the web URL',
+                        placeHolder: 'https://example.com'
+                    });
+                    if (!url) return;
+                    pathOrUrl = url;
+                } else {
+                    pathOrUrl = path.relative(workspaceRoot, fileUri.fsPath);
+                }
+
                 // Choose a category
                 let categories: string[] = [];
                 if (navigatorProvider.config && navigatorProvider.config.categories) {
@@ -187,7 +273,7 @@ export function activate(context: vscode.ExtensionContext) {
 
                 let categoryName = selectedCategory;
 
-                // Handle creating a new category
+                // When creating a new category
                 if (selectedCategory === '+ Create new category') {
                     categoryName = await vscode.window.showInputBox({
                         prompt: 'Enter new category name',
@@ -201,39 +287,54 @@ export function activate(context: vscode.ExtensionContext) {
                     // Add new category to config
                     config.categories.push({
                         label: categoryName,
+                        type: 'category',
                         expanded: true,
-                        items: []
+                        items: [],
+                        collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
+                        filePath: ''
                     });
                 }
 
-                // Find the category and add the file
+                // Find the category
                 const category = config.categories.find(c => c.label === categoryName);
-                if (category) {
-                    // Check for duplicates
-                    const duplicate = category.items.find(item => item.path === relativePath);
-                    if (duplicate) {
-                        vscode.window.showWarningMessage(`File already exists in category ${categoryName}`);
-                        return;
-                    }
-
-                    category.items.push({
-                        label: userLabel,
-                        path: relativePath
-                    });
-
-                    // Save updated config
-                    fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
-
-                    // Refresh the view
-                    navigatorProvider.loadConfig();
-                    vscode.window.showInformationMessage(`Added "${userLabel}" to ${categoryName}`);
+                if (!category) {
+                    vscode.window.showErrorMessage('Category not found');
+                    return;
                 }
+
+                // Initialize items array if it doesn't exist
+                if (!category.items) {
+                    category.items = [];
+                }
+
+                // Check for duplicates
+                const duplicate = category.items.find(item => item.path === pathOrUrl);
+                if (duplicate) {
+                    vscode.window.showWarningMessage(`Item already exists in category ${categoryName}`);
+                    return;
+                }
+
+                // Add the new item
+                category.items.push({
+                    label: userLabel,
+                    path: pathOrUrl,
+                    type: itemType === 'URL' ? 'url' : 'file',
+                    collapsibleState: vscode.TreeItemCollapsibleState.None,
+                    filePath: pathOrUrl
+                });
+
+                // Save updated config
+                fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
+
+                // Refresh the view
+                navigatorProvider.loadConfig();
+                vscode.window.showInformationMessage(`Added "${userLabel}" to ${categoryName}`);
             } catch (error) {
                 vscode.window.showErrorMessage(`Failed to add file: ${error instanceof Error ? error.message : String(error)}`);
             }
         }),
         // Edit file label
-        vscode.commands.registerCommand('opinionatedCrm.editFileLabel', async (item: NavigatorItem) => {
+        vscode.commands.registerCommand('ocrmnavigator.editFileLabel', async (item: NavigatorItem) => {
             if (!item || item.type !== 'file') {
                 return;
             }
@@ -246,8 +347,13 @@ export function activate(context: vscode.ExtensionContext) {
                 // Find the file in the config
                 let fileFound = false;
                 for (const category of config.categories) {
-                    const fileIndex = category.items.findIndex(
-                        fileItem => path.join(workspaceRoot, fileItem.path) === item.filePath
+                    // Skip categories without items array
+                    if (!category.items) {
+                        continue;
+                    }
+
+                    const fileIndex = category.items?.findIndex(
+                        fileItem => fileItem.path && path.join(workspaceRoot, fileItem.path) === item.filePath
                     );
 
                     if (fileIndex >= 0) {
@@ -283,9 +389,9 @@ export function activate(context: vscode.ExtensionContext) {
                 vscode.window.showErrorMessage(`Failed to rename file: ${error instanceof Error ? error.message : String(error)}`);
             }
         }),
-        // Delete file
-        vscode.commands.registerCommand('opinionatedCrm.deleteFile', async (item: NavigatorItem) => {
-            if (!item || item.type !== 'file') {
+        // Delete item (file or URL)
+        vscode.commands.registerCommand('ocrmnavigator.deleteItem', async (item: NavigatorItem) => {
+            if (!item || (item.type !== 'file' && item.type !== 'url' && item.type !== 'command')) {
                 return;
             }
 
@@ -305,17 +411,25 @@ export function activate(context: vscode.ExtensionContext) {
                 const configContent = fs.readFileSync(configPath, 'utf8');
                 const config = JSON.parse(configContent) as NavigatorConfig;
 
-                // Find and remove the file
-                let fileRemoved = false;
+                // Find and remove the item
+                let itemRemoved = false;
                 for (const category of config.categories) {
-                    const fileIndex = category.items.findIndex(
-                        fileItem => path.join(workspaceRoot, fileItem.path) === item.filePath
-                    );
+                    // Use optional chaining and nullish coalescing
+                    const itemIndex = category.items?.findIndex(existingItem => {
+                        // For files, compare full paths
+                        if (item.type === 'file') {
+                            return existingItem.path &&
+                                path.join(workspaceRoot, existingItem.path) === item.filePath;
+                        }
+                        // For URLs and commands, compare directly
+                        return existingItem.path === item.filePath ||
+                            existingItem.cmd === item.cmd;
+                    }) ?? -1;  // Default to -1 if items is undefined
 
-                    if (fileIndex >= 0) {
-                        // Remove file
-                        category.items.splice(fileIndex, 1);
-                        fileRemoved = true;
+                    if (itemIndex >= 0) {
+                        // Remove item (using optional chaining again)
+                        category.items?.splice(itemIndex, 1);
+                        itemRemoved = true;
 
                         // Save config
                         fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
@@ -327,15 +441,17 @@ export function activate(context: vscode.ExtensionContext) {
                     }
                 }
 
-                if (!fileRemoved) {
-                    vscode.window.showWarningMessage('File not found in navigator configuration');
+                if (!itemRemoved) {
+                    vscode.window.showWarningMessage('Item not found in navigator configuration');
                 }
             } catch (error) {
-                vscode.window.showErrorMessage(`Failed to remove file: ${error instanceof Error ? error.message : String(error)}`);
+                vscode.window.showErrorMessage(
+                    `Failed to remove item: ${error instanceof Error ? error.message : String(error)}`
+                );
             }
         }),
         // Move category up
-        vscode.commands.registerCommand('opinionatedCrm.moveCategoryUp', async (item: NavigatorItem) => {
+        vscode.commands.registerCommand('ocrmnavigator.moveCategoryUp', async (item: NavigatorItem) => {
             if (!item || item.type !== 'category') {
                 return;
             }
@@ -368,7 +484,7 @@ export function activate(context: vscode.ExtensionContext) {
             }
         }),
         // Move category down
-        vscode.commands.registerCommand('opinionatedCrm.moveCategoryDown', async (item: NavigatorItem) => {
+        vscode.commands.registerCommand('ocrmnavigator.moveCategoryDown', async (item: NavigatorItem) => {
             if (!item || item.type !== 'category') {
                 return;
             }
@@ -401,7 +517,7 @@ export function activate(context: vscode.ExtensionContext) {
             }
         }),
         // Add new category
-        vscode.commands.registerCommand('opinionatedCrm.addCategory', async () => {
+        vscode.commands.registerCommand('ocrmnavigator.addCategory', async () => {
             try {
                 // Ask for category name
                 const categoryName = await vscode.window.showInputBox({
@@ -423,12 +539,17 @@ export function activate(context: vscode.ExtensionContext) {
                     return;
                 }
 
-                // Add new category
-                config.categories.push({
+                // Create new category with all required properties
+                const newCategory: NavigatorCategoryItem = {
                     label: categoryName,
+                    type: 'category',
                     expanded: true,
-                    items: []
-                });
+                    items: [],
+                    collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
+                    filePath: ''
+                };
+
+                config.categories.push(newCategory);
 
                 // Save config
                 fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
@@ -441,7 +562,7 @@ export function activate(context: vscode.ExtensionContext) {
             }
         }),
         // Rename category
-        vscode.commands.registerCommand('opinionatedCrm.renameCategory', async (item: NavigatorItem) => {
+        vscode.commands.registerCommand('ocrmnavigator.renameCategory', async (item: NavigatorItem) => {
             if (!item || item.type !== 'category') {
                 return;
             }
@@ -485,7 +606,7 @@ export function activate(context: vscode.ExtensionContext) {
             }
         }),
         // Delete category
-        vscode.commands.registerCommand('opinionatedCrm.deleteCategory', async (item: NavigatorItem) => {
+        vscode.commands.registerCommand('ocrmnavigator.deleteCategory', async (item: NavigatorItem) => {
             if (!item || item.type !== 'category') {
                 return;
             }
@@ -496,13 +617,14 @@ export function activate(context: vscode.ExtensionContext) {
                 const config = JSON.parse(configContent) as NavigatorConfig;
 
                 // Find category
-                const categoryIndex = config.categories.findIndex(c => c.label === item.label);
+                const categoryIndex = config.categories?.findIndex(c => c.label === item.label) ?? -1;
                 if (categoryIndex < 0) {
                     return;
                 }
 
-                // Count items in category
-                const itemCount = config.categories[categoryIndex].items.length;
+                // Count items in category (with null check)
+                const category = config.categories[categoryIndex];
+                const itemCount = category.items?.length ?? 0;
 
                 // Confirm deletion
                 const message = itemCount > 0
@@ -533,7 +655,7 @@ export function activate(context: vscode.ExtensionContext) {
             }
         }),
         // export config from file
-        vscode.commands.registerCommand('opinionatedCrm.exportConfig', async () => {
+        vscode.commands.registerCommand('ocrmnavigator.exportConfig', async () => {
             try {
                 if (!workspaceRoot) {
                     vscode.window.showErrorMessage('No workspace folder open');
@@ -566,7 +688,7 @@ export function activate(context: vscode.ExtensionContext) {
             }
         }),
         // Import config from file
-        vscode.commands.registerCommand('opinionatedCrm.importConfig', async () => {
+        vscode.commands.registerCommand('ocrmnavigator.importConfig', async () => {
             try {
                 const fileUris = await vscode.window.showOpenDialog({
                     canSelectMany: false,
@@ -600,38 +722,507 @@ export function activate(context: vscode.ExtensionContext) {
                 vscode.window.showErrorMessage(`Import failed: ${error instanceof Error ? error.message : String(error)}`);
             }
         }),
-        view,
-        {
-            dispose: () => view.dispose()
-        }
+        // add url
+        vscode.commands.registerCommand('ocrmnavigator.addUrlToNavigator', async () => {
+            try {
+                // Get URL from user
+                const url = await vscode.window.showInputBox({
+                    prompt: 'Enter the web URL',
+                    placeHolder: 'https://example.com',
+                    validateInput: value => {
+                        if (!value.match(/^https?:\/\//)) {
+                            return 'URL must start with http:// or https://';
+                        }
+                        return null;
+                    }
+                });
+
+                if (!url) return;
+
+                // Get label from user
+                const label = await vscode.window.showInputBox({
+                    prompt: 'Enter a label for this bookmark',
+                    placeHolder: 'e.g. API Documentation'
+                });
+
+                if (!label) return;
+
+                // Load current config
+                const configContent = fs.readFileSync(configPath, 'utf8');
+                const config = JSON.parse(configContent) as NavigatorConfig;
+
+                // Prepare category selection
+                let categories = config.categories.map(c => c.label);
+                categories.push('+ Create new category');
+
+                const selectedCategory = await vscode.window.showQuickPick(categories, {
+                    placeHolder: 'Select or create a category'
+                });
+
+                if (!selectedCategory) return;
+
+                let categoryName = selectedCategory;
+
+                // Handle new category creation
+                if (selectedCategory === '+ Create new category') {
+                    categoryName = await vscode.window.showInputBox({
+                        prompt: 'Enter new category name',
+                        placeHolder: 'e.g. API LINKS'
+                    }) || '';
+
+                    if (!categoryName) return;
+
+                    config.categories.push({
+                        label: categoryName,
+                        type: 'category',  // Now properly typed
+                        expanded: true,
+                        items: [],
+                        collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
+                        filePath: ''
+                    });
+                }
+
+                // Find the target category
+                const category = config.categories.find(c => c.label === categoryName);
+                if (category) {
+                    // Check for duplicates
+                    const duplicate = category.items?.find(item => item.path === url);
+                    if (duplicate) {
+                        vscode.window.showWarningMessage(`URL already exists in category ${categoryName}`);
+                        return;
+                    }
+
+                    // Add the URL bookmark
+                    category.items.push({
+                        label: label,
+                        path: url,
+                        type: 'url',
+                        collapsibleState: vscode.TreeItemCollapsibleState.None,
+                        filePath: url
+                    });
+
+                    // Save and refresh
+                    fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
+                    navigatorProvider.loadConfig();
+                    vscode.window.showInformationMessage(`Added "${label}" to ${categoryName}`);
+                }
+            } catch (error) {
+                vscode.window.showErrorMessage(`Failed to add URL: ${error instanceof Error ? error.message : String(error)}`);
+            }
+        }),
+        // edit url
+        // edit url
+        vscode.commands.registerCommand('ocrmnavigator.editWebUrl', async (item: NavigatorItem) => {
+            if (!item || item.type !== 'url') return;
+
+            try {
+                // Read current config
+                const configContent = fs.readFileSync(configPath, 'utf8');
+                const config = JSON.parse(configContent) as NavigatorConfig;
+
+                // Find the URL item in the config
+                let urlFound = false;
+                for (const category of config.categories) {
+                    // Skip categories with no items
+                    if (!category.items) continue;
+
+                    const urlIndex = category.items.findIndex(
+                        urlItem => urlItem.path === item.filePath && urlItem.type === 'url'
+                    );
+
+                    if (urlIndex >= 0) {
+                        const urlItem = category.items[urlIndex];
+                        // Get current values
+                        const currentLabel = urlItem.label;
+                        const currentUrl = urlItem.path;
+
+                        // Ask for new label
+                        const newLabel = await vscode.window.showInputBox({
+                            prompt: 'Edit the bookmark label',
+                            placeHolder: 'e.g. Company Website',
+                            value: currentLabel
+                        });
+
+                        if (!newLabel) return; // User cancelled
+
+                        // Ask for new URL
+                        const newUrl = await vscode.window.showInputBox({
+                            prompt: 'Edit the web URL',
+                            placeHolder: 'https://example.com',
+                            value: currentUrl,
+                            validateInput: (value) => {
+                                if (!value.match(/^https?:\/\//)) {
+                                    return 'Please enter a valid URL starting with http:// or https://';
+                                }
+                                return null;
+                            }
+                        });
+
+                        if (!newUrl) return; // User cancelled
+
+                        // Update the item
+                        urlItem.label = newLabel;
+                        urlItem.path = newUrl;
+
+                        // Save config
+                        fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
+
+                        // Refresh view
+                        navigatorProvider.loadConfig();
+                        vscode.window.showInformationMessage('Bookmark updated');
+                        urlFound = true;
+                        break;
+                    }
+                }
+
+                if (!urlFound) {
+                    vscode.window.showWarningMessage('Bookmark not found in configuration');
+                }
+            } catch (error) {
+                vscode.window.showErrorMessage(`Failed to edit bookmark: ${error instanceof Error ? error.message : String(error)}`);
+            }
+        }),
+        // add cmd
+        vscode.commands.registerCommand('ocrmnavigator.addCommand', async () => {
+            try {
+                const command = await vscode.window.showInputBox({
+                    prompt: 'Enter VS Code command ID',
+                    placeHolder: 'editor.action.formatDocument',
+                    validateInput: value => {
+                        if (!value?.trim()) return 'Command cannot be empty';
+
+                        // Basic validation for command format
+                        if (!value.includes('.')) {
+                            return 'Command should be in format "extension.command"';
+                        }
+
+                        // You could add a list of known valid commands here
+                        const knownCommands = [
+                            'workbench.action.files.saveAll',
+                            'editor.action.formatDocument',
+                            'editor.foldLevel1'
+                            // Add other known commands
+                        ];
+
+                        if (!knownCommands.includes(value)) {
+                            return 'Warning: This command is not in the known commands list';
+                        }
+
+                        return null;
+                    }
+                });
+
+                if (!command) return;  // User cancelled
+
+                const label = await vscode.window.showInputBox({
+                    prompt: 'Enter display label',
+                    placeHolder: 'Format Document'
+                });
+
+                if (!label) return;
+
+                // Load config
+                const configContent = fs.readFileSync(configPath, 'utf8');
+                const config = JSON.parse(configContent) as NavigatorConfig;
+
+                // Find or create CMDS category
+                let cmdCategory = config.categories.find(c => c.label === 'CMDS');
+                if (!cmdCategory) {
+                    cmdCategory = {
+                        label: 'CMDS',
+                        type: 'category',
+                        expanded: true,
+                        items: [],
+                        collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
+                        filePath: ''
+                    };
+                    config.categories.push(cmdCategory);
+                }
+
+                // Ensure items exists
+                if (!cmdCategory.items) {
+                    cmdCategory.items = [];
+                }
+
+                // Get subcategories under CMDS
+                const subcategories = cmdCategory.items
+                    .filter((item): item is NavigatorCategoryItem => item.type === 'category')
+                    .map(item => item.label);
+
+                const options = [
+                    'Add to root CMDS',
+                    ...subcategories,
+                    '+ Create new subcategory'
+                ];
+
+                const placement = await vscode.window.showQuickPick(options, {
+                    placeHolder: 'Where should this command be placed?'
+                });
+
+                if (!placement) return;
+
+                let targetItems: NavigatorItem[] = cmdCategory.items; // Default to root
+
+                if (placement === '+ Create new subcategory') {
+                    const subcategoryName = await vscode.window.showInputBox({
+                        prompt: 'Enter new subcategory name',
+                        placeHolder: 'e.g. Formatting Commands'
+                    });
+
+                    if (!subcategoryName) return;
+
+                    const newSubcategory: NavigatorCategoryItem = {
+                        label: subcategoryName,
+                        type: 'category',
+                        expanded: true,
+                        items: [],
+                        collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
+                        filePath: ''
+                    };
+
+                    cmdCategory.items.push(newSubcategory);
+                    targetItems = newSubcategory.items;
+                }
+                else if (placement !== 'Add to root CMDS') {
+                    const subcategory = cmdCategory.items.find(
+                        (item): item is NavigatorCategoryItem =>
+                            item.type === 'category' && item.label === placement
+                    );
+                    if (subcategory) {
+                        targetItems = subcategory.items || [];
+                    }
+                }
+
+                // Add the command with all required properties
+                targetItems.push({
+                    label,
+                    cmd: command,
+                    type: 'command',
+                    collapsibleState: vscode.TreeItemCollapsibleState.None,
+                    filePath: ''
+                });
+
+                // Save and refresh
+                fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
+                navigatorProvider.loadConfig();
+                vscode.window.showInformationMessage(
+                    `Added command "${label}" to ${placement === 'Add to root CMDS' ? 'CMDS' : placement}`
+                );
+            } catch (error) {
+                vscode.window.showErrorMessage(
+                    `Failed to add command: ${error instanceof Error ? error.message : String(error)}`
+                );
+            }
+        }),
+        // Register the command executor
+        vscode.commands.registerCommand('ocrmnavigator.executeCommand', (item: NavigatorItem) => {
+             vscode.window.showInformationMessage(`Executing cmd: ${item.filePath}`)
+             vscode.commands.executeCommand(item.filePath).then(undefined, err => {
+                vscode.window.showErrorMessage(
+                    `Failed to execute "${item.label}": ${err.message}`
+                );
+            });
+          }),
+        // Add subcategory command
+        vscode.commands.registerCommand('ocrmnavigator.addSubcategory', async (parentItem: NavigatorItem) => {
+            try {
+                if (!parentItem || parentItem.type !== 'category') {
+                    vscode.window.showErrorMessage('Please select a category first');
+                    return;
+                }
+
+                const subcategoryName = await vscode.window.showInputBox({
+                    prompt: 'Enter subcategory name',
+                    placeHolder: 'e.g. Important Files'
+                });
+
+                if (!subcategoryName) return;
+
+                // Load config
+                const configContent = fs.readFileSync(configPath, 'utf8');
+                const config = JSON.parse(configContent) as NavigatorConfig;
+
+                // Find parent category
+                const parentCategory = config.categories.find(c => c.label === parentItem.label);
+                if (!parentCategory) {
+                    vscode.window.showErrorMessage('Parent category not found');
+                    return;
+                }
+
+                // Create new subcategory
+                const newSubcategory: NavigatorCategoryItem = {
+                    label: subcategoryName,
+                    type: 'category',
+                    expanded: true,
+                    items: [],
+                    collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
+                    filePath: ''
+                };
+
+                parentCategory.items.push(newSubcategory);
+
+                // Save config
+                fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
+
+                // Refresh view
+                navigatorProvider.refresh();
+                vscode.window.showInformationMessage(`Added subcategory "${subcategoryName}"`);
+            } catch (error) {
+                vscode.window.showErrorMessage(
+                    `Failed to add subcategory: ${error instanceof Error ? error.message : String(error)}`
+                );
+            }
+        }),
+        // Add command directly to category
+        vscode.commands.registerCommand('ocrmnavigator.addCommandToCategory', async (parentItem: NavigatorItem) => {
+            try {
+                const command = await vscode.window.showInputBox({
+                    prompt: 'Enter VS Code command ID',
+                    placeHolder: 'editor.action.formatDocument',
+                    validateInput: value => {
+                        if (!value.trim()) return 'Command cannot be empty';
+                        return null;
+                    }
+                });
+
+                if (!command) return;
+
+                const label = await vscode.window.showInputBox({
+                    prompt: 'Enter display label',
+                    placeHolder: 'Format Document'
+                });
+
+                if (!label) return;
+
+                // Load config
+                const configContent = fs.readFileSync(configPath, 'utf8');
+                const config = JSON.parse(configContent) as NavigatorConfig;
+
+                // Find or create CMDS category
+                let cmdCategory = config.categories.find(c => c.label === 'CMDS');
+                if (!cmdCategory) {
+                    cmdCategory = {
+                        label: 'CMDS',
+                        type: 'category',
+                        expanded: true,
+                        items: [],
+                        collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
+                        filePath: ''
+                    };
+                    config.categories.push(cmdCategory);
+                }
+
+                // Ensure items exists
+                if (!cmdCategory.items) {
+                    cmdCategory.items = [];
+                }
+
+                // Get subcategories under CMDS
+                const subcategories = cmdCategory.items
+                    .filter((item): item is NavigatorCategoryItem => item.type === 'category')
+                    .map(item => item.label);
+
+                const options = [
+                    'Add to root CMDS',
+                    ...subcategories,
+                    '+ Create new subcategory'
+                ];
+
+                const placement = await vscode.window.showQuickPick(options, {
+                    placeHolder: 'Where should this command be placed?'
+                });
+
+                if (!placement) return;
+
+                let targetItems: NavigatorItem[] = cmdCategory.items; // Default to root
+
+                if (placement === '+ Create new subcategory') {
+                    const subcategoryName = await vscode.window.showInputBox({
+                        prompt: 'Enter new subcategory name',
+                        placeHolder: 'e.g. Formatting Commands'
+                    });
+
+                    if (!subcategoryName) return;
+
+                    const newSubcategory: NavigatorCategoryItem = {
+                        label: subcategoryName,
+                        type: 'category',
+                        expanded: true,
+                        items: [],
+                        collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
+                        filePath: ''
+                    };
+
+                    cmdCategory.items.push(newSubcategory);
+                    targetItems = newSubcategory.items;
+                }
+                else if (placement !== 'Add to root CMDS') {
+                    const subcategory = cmdCategory.items.find(
+                        (item): item is NavigatorCategoryItem =>
+                            item.type === 'category' && item.label === placement
+                    );
+                    if (subcategory) {
+                        targetItems = subcategory.items || [];
+                    }
+                }
+
+                // Add the command with all required properties
+                targetItems.push({
+                    label,
+                    cmd: command,
+                    type: 'command',
+                    collapsibleState: vscode.TreeItemCollapsibleState.None,
+                    filePath: ''
+                });
+
+                // Save and refresh
+                fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
+                navigatorProvider.loadConfig();
+                vscode.window.showInformationMessage(
+                    `Added command "${label}" to ${placement === 'Add to root CMDS' ? 'CMDS' : placement}`
+                );
+            } catch (error) {
+                vscode.window.showErrorMessage(
+                    `Failed to add command: ${error instanceof Error ? error.message : String(error)}`
+                );
+            }
+        }),
+
+        view, { dispose: () => view.dispose() }
     );
 
     // Add status bar button
     const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
     statusBarItem.text = '$(gear) Edit Navigator';
     statusBarItem.tooltip = 'Edit the navigator configuration';
-    statusBarItem.command = 'opinionatedCrm.editConfig';
+    statusBarItem.command = 'ocrmnavigator.editConfig';
     statusBarItem.show();
     context.subscriptions.push(statusBarItem);
 
     const exportButton = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right);
     exportButton.text = "$(arrow-down)";
     exportButton.tooltip = "Export configuration";
-    exportButton.command = 'opinionatedCrm.exportConfig';
+    exportButton.command = 'ocrmnavigator.exportConfig';
     context.subscriptions.push(exportButton);
-    
+
     const importButton = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right);
     importButton.text = "$(arrow-up)";
     importButton.tooltip = "Import configuration";
-    importButton.command = 'opinionatedCrm.importConfig';
+    importButton.command = 'ocrmnavigator.importConfig';
     context.subscriptions.push(importButton);
-    
+
+    const addCmd = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right);
+        importButton.text = "$(terminal)";
+        importButton.tooltip = "Add CMD";
+        importButton.command = 'ocrmnavigator.addCommandToCategory';
+        context.subscriptions.push(addCmd);
+
     // Add them to the view title
     view.title = "F/F Navigator";
     // Ensure view is visible
     setTimeout(() => {
         if (!view.visible) {
-            vscode.commands.executeCommand('opinionatedCrmNavigator.focus');
+            vscode.commands.executeCommand('ocrmnavigatorNavigator.focus');
         }
     }, 1000);
 }
