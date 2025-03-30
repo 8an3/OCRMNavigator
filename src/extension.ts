@@ -58,7 +58,7 @@ export function activate(context: vscode.ExtensionContext) {
                     ]
                 },
                 {
-                    "label": "DASHBOARDS",
+                    "label": "FILES",
                     "expanded": true,
                     "items": [
                         {
@@ -137,7 +137,39 @@ export function activate(context: vscode.ExtensionContext) {
                             "type": "url"
                         }
                     ]
-                }
+                }, 
+                 {
+                    "label": "MD",
+                    "expanded": false,
+                    "items": [
+                        {
+                            "label": "Admin Dashboard",
+                            "path": "apps/app/app/routes/portal/$dept/settings/general.tsx",
+                            "type": "file"
+                        },
+                        {
+                            "label": "Client Dashboard",
+                            "path": "apps/app/app/routes/client/portal/sales/dashboard.tsx",
+                            "type": "file"
+                        }
+                    ]
+                }, 
+                {
+                   "label": "TODO",
+                   "expanded": false,
+                   "items": [
+                       {
+                           "label": "Admin Dashboard",
+                           "path": "apps/app/app/routes/portal/$dept/settings/general.tsx",
+                           "type": "file"
+                       },
+                       {
+                           "label": "Client Dashboard",
+                           "path": "apps/app/app/routes/client/portal/sales/dashboard.tsx",
+                           "type": "file"
+                       }
+                   ]
+               }
             ]
         };
         fs.writeFileSync(configPath, JSON.stringify(defaultConfig, null, 2));
@@ -153,9 +185,111 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     let itemToMove: NavigatorItem | null = null;
+    // helper function for snippets
+    const SNIPPETS_TSX_DIR = path.join('.vscode', 'snippets-tsx');
+    const SNIPPETS_DIR = path.join('.vscode');
+    interface SnippetDefinition {
+        prefix: string;
+        body: string[];
+        description: string;
+        scope: string;
+    }
+    
+    interface SnippetCollection {
+        [name: string]: SnippetDefinition;
+    }
+    
+    async function processSnippetFiles(workspaceRoot: string) {
+        const tsxSnippetsPath = path.join(workspaceRoot, SNIPPETS_TSX_DIR);
+        const snippetsPath = path.join(workspaceRoot, SNIPPETS_DIR);
+        const snippetFilePath = path.join(snippetsPath, 'ocrmnavigator.code-snippets');
+    
+        // Create directories if they don't exist
+        if (!fs.existsSync(tsxSnippetsPath)) {
+            fs.mkdirSync(tsxSnippetsPath, { recursive: true });
+        }
+        if (!fs.existsSync(snippetsPath)) {
+            fs.mkdirSync(snippetsPath, { recursive: true });
+        }
+    
+        // Load existing snippets if file exists
+        let existingSnippets: SnippetCollection = {};
+        if (fs.existsSync(snippetFilePath)) {
+            try {
+                existingSnippets = JSON.parse(fs.readFileSync(snippetFilePath, 'utf8')) as SnippetCollection;
+            } catch (e) {
+                console.error('Error parsing existing snippets:', e);
+                existingSnippets = {};
+            }
+        }
+    
+        // Process all .tsx snippet files
+        const tsxFiles = fs.readdirSync(tsxSnippetsPath)
+            .filter(file => file.endsWith('.snippet.tsx'));
+    
+        let changed = false;
+        for (const tsxFile of tsxFiles) {
+            const tsxFilePath = path.join(tsxSnippetsPath, tsxFile);
+            const snippetName = path.basename(tsxFile, '.snippet.tsx');
+    
+            try {
+                // Read TSX file content
+                const content = fs.readFileSync(tsxFilePath, 'utf8');
+                const lines = content.split('\n').filter(line => line.trim() !== '');
+    
+                if (lines.length < 1) {
+                    vscode.window.showWarningMessage(`Snippet ${tsxFile} needs at least 1 line (prefix)`);
+                    continue;
+                }
+    
+                // Extract prefix (first line) and body (remaining lines)
+                const prefix = lines[0].trim();
+                const body = lines.slice(1).join('\n');
+    
+                // Add/update the snippet in our collection
+                existingSnippets[snippetName] = {
+                    prefix,
+                    body: body.split('\n'),
+                    description: `Custom snippet from ${tsxFile}`,
+                    scope: "typescript,typescriptreact"
+                };
+    
+                changed = true;
+    
+                // Delete the processed TSX file
+                fs.unlinkSync(tsxFilePath);
+    
+            } catch (error) {
+                vscode.window.showErrorMessage(
+                    `Failed to process ${tsxFile}: ${error instanceof Error ? error.message : String(error)}`
+                );
+            }
+        }
+    
+        // Only write if we made changes
+        if (changed) {
+            fs.writeFileSync(snippetFilePath, JSON.stringify(existingSnippets, null, 2));
+        }
+    }
+    function setupFileWatcher(workspaceRoot: string) {
+        const tsxSnippetsPath = path.join(workspaceRoot, SNIPPETS_TSX_DIR);
+        const watcher = vscode.workspace.createFileSystemWatcher(
+            new vscode.RelativePattern(tsxSnippetsPath, '*.snippet.tsx')
+        );
+
+        watcher.onDidChange(uri => processSnippetFiles(workspaceRoot));
+        watcher.onDidCreate(uri => processSnippetFiles(workspaceRoot));
+        watcher.onDidDelete(uri => processSnippetFiles(workspaceRoot));
+
+        return watcher;
+    }
 
 
-    // Register commands
+    // Initial processing
+    processSnippetFiles(workspaceRoot);
+
+    // Set up watcher
+    const watcher = setupFileWatcher(workspaceRoot);
 
     context.subscriptions.push(
         // DRAG AND DROP 
@@ -392,75 +526,14 @@ export function activate(context: vscode.ExtensionContext) {
                     pathOrUrl = path.relative(workspaceRoot, fileUri.fsPath);
                 }
 
-                // Choose a category
-                let categories: string[] = [];
-                if (navigatorProvider.config && navigatorProvider.config.categories) {
-                    categories = navigatorProvider.config.categories.map(c => c.label);
-                }
-
-                // Add option to create a new category
-                categories.push('+ Create new category');
-
-                const selectedCategory = await vscode.window.showQuickPick(categories, {
-                    placeHolder: 'Select or create a category'
-                });
-
-                if (!selectedCategory) { return; }
-
-                // Load current config
+                // create / select folder
                 const configContent = fs.readFileSync(configPath, 'utf8');
                 const config = JSON.parse(configContent) as NavigatorConfig;
-
-                let categoryName = selectedCategory;
-
-                // When creating a new category
-                if (selectedCategory === '+ Create new category') {
-                    categoryName = await vscode.window.showInputBox({
-                        prompt: 'Enter new category name',
-                        placeHolder: 'e.g. COMPONENTS',
-                        validateInput: value => {
-                            if (!value.trim()) return 'Category name cannot be empty';
-                            if (config.categories.some(c => c.label === value)) {
-                                return 'Category already exists';
-                            }
-                            return null;
-                        }
-                    }) || '';
-                    // User cancelled
-                    if (!categoryName) { return; }
-
-                    // Add new category to config
-                    config.categories.push({
-                        label: categoryName,
-                        type: 'folder',
-                        expanded: true,
-                        items: [],
-                        collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
-                        filePath: ''
-                    });
-                }
-
-                // Find the category
-                const category = config.categories.find(c => c.label === categoryName);
-                if (!category) {
-                    vscode.window.showErrorMessage('Category not found');
-                    return;
-                }
-
-                // Initialize items array if it doesn't exist
-                if (!category.items) {
-                    category.items = [];
-                }
-
-                // Check for duplicates
-                const duplicate = category.items.find(item => item.path === pathOrUrl);
-                if (duplicate) {
-                    vscode.window.showWarningMessage(`Item already exists in category ${categoryName}`);
-                    return;
-                }
+                const folderSelection = await selectFolder(config);
+                if (!folderSelection) return;
 
                 // Add the new item
-                category.items.push({
+                folderSelection.targetItems.push({
                     label: userLabel,
                     path: pathOrUrl,
                     type: itemType === 'URL' ? 'url' : 'file',
@@ -473,7 +546,7 @@ export function activate(context: vscode.ExtensionContext) {
 
                 // Refresh the view
                 navigatorProvider.loadConfig();
-                vscode.window.showInformationMessage(`Added "${userLabel}" to ${categoryName}`);
+                vscode.window.showInformationMessage(`Added "${userLabel}" to ${folderSelection.location}`);
             } catch (error) {
                 vscode.window.showErrorMessage(`Failed to add file: ${error instanceof Error ? error.message : String(error)}`);
             }
@@ -871,65 +944,29 @@ export function activate(context: vscode.ExtensionContext) {
 
                 if (!label) return;
 
-                // Load current config
+                // create / select folder
+                // create / select folder
                 const configContent = fs.readFileSync(configPath, 'utf8');
                 const config = JSON.parse(configContent) as NavigatorConfig;
+                const folderSelection = await selectFolder(config);
+                if (!folderSelection) return;
+                // create / select folder
+                // create / select folder
+                // need to fix folderSelection.targetItems below
 
-                // Prepare category selection
-                let categories = config.categories.map(c => c.label);
-                categories.push('+ Create new category');
-
-                const selectedCategory = await vscode.window.showQuickPick(categories, {
-                    placeHolder: 'Select or create a category'
+                // Add the URL bookmark
+                folderSelection.targetItems.push({
+                    label: label,
+                    path: url,
+                    type: 'url',
+                    collapsibleState: vscode.TreeItemCollapsibleState.None,
+                    filePath: url
                 });
 
-                if (!selectedCategory) return;
-
-                let categoryName = selectedCategory;
-
-                // Handle new category creation
-                if (selectedCategory === '+ Create new category') {
-                    categoryName = await vscode.window.showInputBox({
-                        prompt: 'Enter new category name',
-                        placeHolder: 'e.g. API LINKS'
-                    }) || '';
-
-                    if (!categoryName) return;
-
-                    config.categories.push({
-                        label: categoryName,
-                        type: 'folder',  // Now properly typed
-                        expanded: true,
-                        items: [],
-                        collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
-                        filePath: ''
-                    });
-                }
-
-                // Find the target category
-                const category = config.categories.find(c => c.label === categoryName);
-                if (category) {
-                    // Check for duplicates
-                    const duplicate = category.items?.find(item => item.path === url);
-                    if (duplicate) {
-                        vscode.window.showWarningMessage(`URL already exists in category ${categoryName}`);
-                        return;
-                    }
-
-                    // Add the URL bookmark
-                    category.items.push({
-                        label: label,
-                        path: url,
-                        type: 'url',
-                        collapsibleState: vscode.TreeItemCollapsibleState.None,
-                        filePath: url
-                    });
-
-                    // Save and refresh
-                    fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
-                    navigatorProvider.loadConfig();
-                    vscode.window.showInformationMessage(`Added "${label}" to ${categoryName}`);
-                }
+                // Save and refresh
+                fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
+                navigatorProvider.loadConfig();
+                vscode.window.showInformationMessage(`Added "${label}" to ${folderSelection.location}`);
             } catch (error) {
                 vscode.window.showErrorMessage(`Failed to add URL: ${error instanceof Error ? error.message : String(error)}`);
             }
@@ -1100,135 +1137,14 @@ export function activate(context: vscode.ExtensionContext) {
 
                 if (!label) return;
 
-                // Load config
+                // create / select folder
+                // create / select folder
                 const configContent = fs.readFileSync(configPath, 'utf8');
                 const config = JSON.parse(configContent) as NavigatorConfig;
-
-                // Function to select or create folder
-                const selectFolder = async (): Promise<{ targetItems: NavigatorItem[], location: string } | undefined> => {
-                    // Get all available folders
-                    const allFolders: { label: string, items: NavigatorItem[] }[] = [];
-
-                    const collectFolders = (items: NavigatorItem[], path: string): void => {
-                        items.forEach(item => {
-                            if (item.type === 'folder') {
-                                const fullPath = `${path}/${item.label}`;
-                                allFolders.push({
-                                    label: fullPath,
-                                    items: (item as NavigatorCategoryItem).items || []
-                                });
-                                if ((item as NavigatorCategoryItem).items) {
-                                    collectFolders((item as NavigatorCategoryItem).items, fullPath);
-                                }
-                            }
-                        });
-                    };
-
-                    collectFolders(config.categories, '');
-
-                    // Define proper types for QuickPick options
-                    type FolderOption = {
-                        label: string;
-                        description: string;
-                        folder?: { label: string; items: NavigatorItem[] };
-                    };
-
-                    // Prepare quick pick options
-                    const options: FolderOption[] = [
-                        {
-                            label: 'Create new folder',
-                            description: 'Add a new top-level folder'
-                        },
-                        ...allFolders.map(folder => ({
-                            label: folder.label,
-                            description: `${folder.items.length} items`,
-                            folder: folder // Explicitly include folder property
-                        }))
-                    ];
-
-                    const selected = await vscode.window.showQuickPick(options, {
-                        placeHolder: 'Select a folder or create new'
-                    });
-
-                    if (!selected) return undefined;
-
-                    if (selected.label === 'Create new folder') {
-                        const folderName = await vscode.window.showInputBox({
-                            prompt: 'Enter new folder name',
-                            validateInput: value => {
-                                if (!value.trim()) return 'Folder name cannot be empty';
-                                return null;
-                            }
-                        });
-
-                        if (!folderName) return undefined;
-
-                        const newFolder: NavigatorCategoryItem = {
-                            label: folderName,
-                            type: 'folder',
-                            expanded: true,
-                            items: [],
-                            collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
-                            filePath: ''
-                        };
-
-                        config.categories.push(newFolder);
-                        return {
-                            targetItems: newFolder.items,
-                            location: folderName
-                        };
-                    } else {
-                        // Type guard to ensure folder exists
-                        if (!selected.folder) {
-                            vscode.window.showErrorMessage('Invalid folder selection');
-                            return undefined;
-                        }
-
-                        // Ask if they want to add directly or create subfolder
-                        const action = await vscode.window.showQuickPick([
-                            'Add directly here',
-                            'Create subfolder'
-                        ], {
-                            placeHolder: `Add to ${selected.label} or create subfolder?`
-                        });
-
-                        if (!action) return undefined;
-
-                        if (action === 'Create subfolder') {
-                            const subfolderName = await vscode.window.showInputBox({
-                                prompt: 'Enter subfolder name',
-                                validateInput: value => {
-                                    if (!value.trim()) return 'Subfolder name cannot be empty';
-                                    return null;
-                                }
-                            });
-
-                            if (!subfolderName) return undefined;
-
-                            const newSubfolder: NavigatorCategoryItem = {
-                                label: subfolderName,
-                                type: 'folder',
-                                expanded: true,
-                                items: [],
-                                collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
-                                filePath: ''
-                            };
-
-                            selected.folder.items.push(newSubfolder);
-                            return {
-                                targetItems: newSubfolder.items,
-                                location: `${selected.label}/${subfolderName}`
-                            };
-                        } else {
-                            return {
-                                targetItems: selected.folder.items,
-                                location: selected.label
-                            };
-                        }
-                    }
-                };
-                const folderSelection = await selectFolder();
+                const folderSelection = await selectFolder(config);
                 if (!folderSelection) return;
+                // create / select folder
+                // create / select folder
 
                 // Add the command
                 folderSelection.targetItems.push({
@@ -1481,11 +1397,11 @@ export function activate(context: vscode.ExtensionContext) {
                 const config = JSON.parse(configContent) as NavigatorConfig;
 
                 // Select or create category
-                const category = await selectOrCreateCategory(config);
+                const category = await selectFolder(config);
                 if (!category) return;
 
                 // Set up snippets directory - using path.join handles all path separators correctly
-                const snippetsDir = path.join(workspaceRoot, '.vscode', 'snippets');
+                const snippetsDir = path.join(workspaceRoot, '.vscode', 'snippets-tsx');
                 if (!fs.existsSync(snippetsDir)) {
                     fs.mkdirSync(snippetsDir, { recursive: true });
                 }
@@ -1496,31 +1412,22 @@ export function activate(context: vscode.ExtensionContext) {
                     .replace(/\s+/g, '-')
                     .replace(/[^a-z0-9-]/g, '');
 
-                const snippetFileName = `${cleanSnippetName}.code-snippets`;
+                const snippetFileName = `${cleanSnippetName}.snippet.tsx`;
                 const snippetPath = path.join(snippetsDir, snippetFileName);
 
                 // Create default snippet template
-                const defaultSnippetContent = `{
-          "${snippetName}": {
-            "prefix": "${cleanSnippetName}",
-            "body": [
-              "// Your snippet code here",
-              "$0"
-            ],
-            "description": "${snippetName}"
-          }
-        }`;
+                const defaultSnippetContent = `${cleanSnippetName}`;
 
                 // Create the snippet file
                 fs.writeFileSync(snippetPath, defaultSnippetContent, 'utf8');
 
                 // Add reference to the Navigator config
-                category.items.push({
+                category.targetItems.push({
                     label: snippetName,
-                    path: `.vscode/snippets/${snippetFileName}`,
+                    path: `.vscode/ocrmnavigator.code-snippets`,
                     type: 'file',
                     collapsibleState: vscode.TreeItemCollapsibleState.None,
-                    filePath: ''
+                             filePath:''
                 });
 
                 // Save the updated config
@@ -1592,69 +1499,211 @@ export function activate(context: vscode.ExtensionContext) {
         }),
         vscode.commands.registerCommand('ocrmnavigator.editSnippet', async (item: NavigatorItem) => {
             try {
-                // Validation checks
-                if (!item || item.type !== 'file') {
-                    vscode.window.showErrorMessage('Please select a snippet to edit');
+                if (!workspaceRoot) {
+                    vscode.window.showErrorMessage('No workspace folder open');
                     return;
                 }
-
-                if (!item.filePath) {
-                    vscode.window.showErrorMessage('Invalid snippet: missing file path');
-                    return;
-                }
-
-                // Check if it's in the snippets directory
-                if (!item.filePath.includes(path.join('.vscode', 'snippets'))) {
-                    vscode.window.showErrorMessage('Selected item is not a snippet');
-                    return;
-                }
-
-                // Check if file exists
-                if (!fs.existsSync(item.filePath)) {
-                    // Handle case where file might have been deleted outside of VSCode
-                    const createNew = await vscode.window.showInformationMessage(
-                        `Snippet file not found. Do you want to create it?`,
-                        'Yes', 'No'
-                    );
-
-                    if (createNew === 'Yes') {
-                        // Create empty snippet file with template
-                        const snippetName = path.basename(item.filePath, path.extname(item.filePath));
-                        const snippetContent =
-                            `${snippetName.replace(/\s+/g, '-').toLowerCase()}
         
-        // First line above is used for prefix
-        // Everything below will be used for the body of the snippet
-        // Write your snippet content here
-        `;
-                        fs.writeFileSync(item.filePath, snippetContent, 'utf8');
-                    } else {
-                        return;
-                    }
-                }
-
-                // Open the snippet file
-                const doc = await vscode.workspace.openTextDocument(item.filePath);
-                await vscode.window.showTextDocument(doc);
-
-                // If it's a new file, move cursor to line 3 (after the prefix line and blank line)
-                if (doc.getText().trim().split('\n').length <= 3) {
-                    const editor = vscode.window.activeTextEditor;
-                    if (editor) {
-                        const position = new vscode.Position(3, 0);
-                        editor.selection = new vscode.Selection(position, position);
-                        editor.revealRange(new vscode.Range(position, position));
-                    }
-                }
-            } catch (error) {
-                vscode.window.showErrorMessage(
-                    `Failed to edit snippet: ${error instanceof Error ? error.message : String(error)}`
+                // Get the snippets file path - use item.path or fallback to default
+                const snippetsFilePath = path.join(
+                    workspaceRoot, 
+                    item.path || ".vscode/ocrmnavigator.code-snippets"
                 );
+                
+                if (!fs.existsSync(snippetsFilePath)) {
+                    vscode.window.showErrorMessage(`Snippets file not found at ${snippetsFilePath}`);
+                    return;
+                }
+        
+                // Read the snippets JSON file
+                const snippetsContent = fs.readFileSync(snippetsFilePath, 'utf8');
+                const snippets = JSON.parse(snippetsContent);
+        
+                // Get the snippet key - prioritize item.name, fallback to item.filePath
+                const snippetKey = item.label
+                .toLowerCase()
+                .replace(/\s+/g, '-')
+                .replace(/[^a-z0-9-]/g, '');
+                if (!snippetKey) {
+                    vscode.window.showErrorMessage('No snippet key specified (both name and filePath are missing)');
+                    return;
+                }
+        
+                // Access the snippet data
+                const snippetData = snippets[snippetKey];
+                if (!snippetData) {
+                    const availableSnippets = Object.keys(snippets).join(', ');
+                    vscode.window.showErrorMessage(
+                        `Snippet "${snippetKey}" not found in snippets file.\n` +
+                        `Available snippets: ${availableSnippets || item.label}`
+                    );
+                    return;
+                }
+        
+                // Create TSX version in the snippets-tsx directory
+                const tsxSnippetsDir = path.join(workspaceRoot, '.vscode', 'snippets-tsx');
+                if (!fs.existsSync(tsxSnippetsDir)) {
+                    fs.mkdirSync(tsxSnippetsDir, { recursive: true });
+                }
+        
+                const tsxFilePath = path.join(tsxSnippetsDir, `${snippetKey}.snippet.tsx`);
+        
+                // Convert to TSX format: 1st line = prefix, rest = body
+                const tsxContent = [
+                    item.label,
+                    ...(snippetData.body || [])
+                ].join('\n');
+        
+                // Write the TSX file
+                fs.writeFileSync(tsxFilePath, tsxContent);
+        
+                // Open the TSX file for editing
+                const doc = await vscode.workspace.openTextDocument(tsxFilePath);
+                await vscode.window.showTextDocument(doc);
+        
+                // Use a separate variable for the timeout
+                let watcherTimeout: NodeJS.Timeout;
+                
+                const watcher = fs.watch(tsxFilePath, async () => {
+                    // Debounce to avoid multiple rapid saves
+                    clearTimeout(watcherTimeout);
+                    watcherTimeout = setTimeout(async () => {
+                        try {
+                            // Read the edited TSX content
+                            const newTsxContent = fs.readFileSync(tsxFilePath, 'utf8');
+                            const lines = newTsxContent.split('\n');
+        
+                            if (lines.length < 1) {
+                                return; // Need at least prefix line
+                            }
+        
+                            // Read the current snippets file again in case it changed
+                            const currentContent = fs.readFileSync(snippetsFilePath, 'utf8');
+                            const currentSnippets = JSON.parse(currentContent);
+        
+                            // Update the snippet data
+                            currentSnippets[snippetKey] = {
+                                ...(currentSnippets[snippetKey] || {}), // preserve existing properties
+                                prefix: lines[0].trim(),
+                                body: lines.slice(1)
+                            };
+        
+                            // Save back to original snippets file
+                            fs.writeFileSync(snippetsFilePath, JSON.stringify(currentSnippets, null, 2));
+        
+                            // Update the tree view if needed
+                            navigatorProvider.refresh();
+        
+                        } catch (error) {
+                            const errorMessage = error instanceof Error ? error.message : String(error);
+                            vscode.window.showErrorMessage(`Error updating snippet: ${errorMessage}`);
+                        }
+                    }, 500);
+                });
+        
+                // Clean up watcher when document closes
+                const disposable = vscode.workspace.onDidCloseTextDocument(doc => {
+                    if (doc.uri.fsPath === tsxFilePath) {
+                        watcher.close();
+                        disposable.dispose();
+                        if (watcherTimeout) {
+                            clearTimeout(watcherTimeout);
+                        }
+                    }
+                });
+        
+            } catch (error) {
+                const errorMessage = error instanceof Error ? error.message : String(error);
+                vscode.window.showErrorMessage(`Failed to edit snippet: ${errorMessage}`);
             }
         }),
 
 
-        view, { dispose: () => view.dispose() }
+        // MD
+        vscode.commands.registerCommand('ocrmnavigator.createMD', async (parentItem?: NavigatorItem) => {
+            try {
+                // Validate workspace
+                if (!workspaceRoot) {
+                    vscode.window.showErrorMessage('No workspace folder open');
+                    return;
+                }
+
+                // Get snippet name with proper validation
+                const snippetName = await vscode.window.showInputBox({
+                    prompt: 'Enter snippet name',
+                    placeHolder: 'e.g. React Component',
+                    validateInput: value => {
+                        if (!value?.trim()) return 'Snippet name cannot be empty';
+                        if (/[\\/:*?"<>|]/.test(value)) return 'Invalid characters in name';
+                        return null;
+                    }
+                });
+
+                // Explicitly check for undefined (user cancellation)
+                if (snippetName === undefined || snippetName.trim() === '') {
+                    return;
+                }
+
+                // Load config
+                const configContent = fs.readFileSync(configPath, 'utf8');
+                const config = JSON.parse(configContent) as NavigatorConfig;
+
+                // Select or create category
+                const category = await selectFolder(config);
+                if (!category) return;
+
+                // Set up snippets directory - using path.join handles all path separators correctly
+                const snippetsDir = path.join(workspaceRoot, '.vscode', 'snippets');
+                if (!fs.existsSync(snippetsDir)) {
+                    fs.mkdirSync(snippetsDir, { recursive: true });
+                }
+
+                // Create safe filename - now guaranteed to have a value
+                const cleanSnippetName = snippetName
+                    .toLowerCase()
+                    .replace(/\s+/g, '-')
+                    .replace(/[^a-z0-9-]/g, '');
+
+                const snippetFileName = `${cleanSnippetName}.code-snippets.md`;
+                const snippetPath = path.join(snippetsDir, snippetFileName);
+
+                // Create default snippet template
+                const defaultSnippetContent = `${cleanSnippetName}
+// prefix will be on the top line
+// you can insert the snippet below
+`;
+
+                // Create the snippet file
+                fs.writeFileSync(snippetPath, defaultSnippetContent, 'utf8');
+
+                // Add reference to the Navigator config
+                category.targetItems.push({
+                    label: snippetName,
+                    path: `.vscode/snippets/${snippetFileName}`,
+                    type: 'file',
+                    collapsibleState: vscode.TreeItemCollapsibleState.None,
+                    filePath: ''
+                });
+
+                // Save the updated config
+                fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
+
+                // Refresh the explorer view
+                navigatorProvider.loadConfig();
+
+                // Open the snippet file for editing
+                const document = await vscode.workspace.openTextDocument(snippetPath);
+                await vscode.window.showTextDocument(document);
+
+                vscode.window.showInformationMessage(`✅ Created snippet: ${snippetName}`);
+            } catch (error) {
+                vscode.window.showErrorMessage(
+                    `Failed to create snippet: ${error instanceof Error ? error.message : String(error)}`
+                );
+            }
+        }),
+
+        watcher, view, { dispose: () => view.dispose() }
     );
     // Helper function for folder expansion
     async function updateFolderExpansion(item: NavigatorItem, expanded: boolean) {
@@ -1695,124 +1744,131 @@ export function activate(context: vscode.ExtensionContext) {
             );
         }
     };
-    async function selectOrCreateCategory(config: NavigatorConfig): Promise<NavigatorCategoryItem | undefined> {
-        try {
-            // Get existing categories
-            let categories = config.categories.map(c => c.label);
+    // Function to select or create folder
+    const selectFolder = async (config: NavigatorConfig): Promise<{ targetItems: NavigatorItem[], location: string } | undefined> => {
+        // Get all available folders
+        const allFolders: { label: string, items: NavigatorItem[] }[] = [];
 
-            // Add option to create new
-            categories.push('+ Create new category');
+        const collectFolders = (items: NavigatorItem[], path: string): void => {
+            items.forEach(item => {
+                if (item.type === 'folder') {
+                    const fullPath = `${path}/${item.label}`;
+                    allFolders.push({
+                        label: fullPath,
+                        items: (item as NavigatorCategoryItem).items || []
+                    });
+                    if ((item as NavigatorCategoryItem).items) {
+                        collectFolders((item as NavigatorCategoryItem).items, fullPath);
+                    }
+                }
+            });
+        };
 
-            const selectedCategory = await vscode.window.showQuickPick(categories, {
-                placeHolder: 'Select or create a category'
+        collectFolders(config.categories, '');
+
+        // Define proper types for QuickPick options
+        type FolderOption = {
+            label: string;
+            description: string;
+            folder?: { label: string; items: NavigatorItem[] };
+        };
+
+        // Prepare quick pick options
+        const options: FolderOption[] = [
+            {
+                label: 'Create new folder',
+                description: 'Add a new top-level folder'
+            },
+            ...allFolders.map(folder => ({
+                label: folder.label,
+                description: `${folder.items.length} items`,
+                folder: folder // Explicitly include folder property
+            }))
+        ];
+
+        const selected = await vscode.window.showQuickPick(options, {
+            placeHolder: 'Select a folder or create new'
+        });
+
+        if (!selected) return undefined;
+
+        if (selected.label === 'Create new folder') {
+            const folderName = await vscode.window.showInputBox({
+                prompt: 'Enter new folder name',
+                validateInput: value => {
+                    if (!value.trim()) return 'Folder name cannot be empty';
+                    return null;
+                }
             });
 
-            if (!selectedCategory) return undefined;
+            if (!folderName) return undefined;
 
-            let targetCategory: NavigatorCategoryItem;
+            const newFolder: NavigatorCategoryItem = {
+                label: folderName,
+                type: 'folder',
+                expanded: true,
+                items: [],
+                collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
+                filePath: ''
+            };
 
-            // Handle new category creation
-            if (selectedCategory === '+ Create new category') {
-                const categoryName = await vscode.window.showInputBox({
-                    prompt: 'Enter new category name',
-                    placeHolder: 'e.g. COMPONENTS',
+            config.categories.push(newFolder);
+            return {
+                targetItems: newFolder.items,
+                location: folderName
+            };
+        } else {
+            // Type guard to ensure folder exists
+            if (!selected.folder) {
+                vscode.window.showErrorMessage('Invalid folder selection');
+                return undefined;
+            }
+
+            // Ask if they want to add directly or create subfolder
+            const action = await vscode.window.showQuickPick([
+                'Add directly here',
+                'Create subfolder'
+            ], {
+                placeHolder: `Add to ${selected.label} or create subfolder?`
+            });
+
+            if (!action) return undefined;
+
+            if (action === 'Create subfolder') {
+                const subfolderName = await vscode.window.showInputBox({
+                    prompt: 'Enter subfolder name',
                     validateInput: value => {
-                        if (!value?.trim()) return 'Category name cannot be empty';
-                        if (config.categories.some(c => c.label === value)) {
-                            return 'Category already exists';
-                        }
+                        if (!value.trim()) return 'Subfolder name cannot be empty';
                         return null;
                     }
                 });
 
-                if (!categoryName) return undefined; // User cancelled
+                if (!subfolderName) return undefined;
 
-                targetCategory = {
-                    label: categoryName,
+                const newSubfolder: NavigatorCategoryItem = {
+                    label: subfolderName,
                     type: 'folder',
                     expanded: true,
                     items: [],
                     collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
                     filePath: ''
                 };
-                config.categories.push(targetCategory);
+
+                selected.folder.items.push(newSubfolder);
+                return {
+                    targetItems: newSubfolder.items,
+                    location: `${selected.label}/${subfolderName}`
+                };
             } else {
-                // Find existing category
-                const existingCategory = config.categories.find(c => c.label === selectedCategory);
-                if (!existingCategory) {
-                    vscode.window.showErrorMessage('Category not found');
-                    return undefined;
-                }
-                targetCategory = existingCategory;
+                return {
+                    targetItems: selected.folder.items,
+                    location: selected.label
+                };
             }
-
-            // Check if we should ask about subcategories
-            const shouldAskAboutSubcategories =
-                targetCategory.items &&
-                targetCategory.items.length > 0 &&
-                targetCategory.items.some(item => item.type === 'folder');
-
-            if (shouldAskAboutSubcategories) {
-                const subcategoryOptions = [
-                    { label: 'Add to root', description: `Add to ${targetCategory.label}` },
-                    ...targetCategory.items
-                        .filter((item): item is NavigatorCategoryItem => item.type === 'folder')
-                        .map(item => ({
-                            label: item.label,
-                            description: `Subfolder of ${targetCategory.label}`
-                        })),
-                    { label: 'Create new subfolder', description: `Under ${targetCategory.label}` }
-                ];
-
-                const placement = await vscode.window.showQuickPick(subcategoryOptions, {
-                    placeHolder: `Where in ${targetCategory.label} should this be placed?`
-                });
-
-                if (!placement) return undefined; // User cancelled
-
-                if (placement.label === 'Create new subfolder') {
-                    const subfolderName = await vscode.window.showInputBox({
-                        prompt: 'Enter new subfolder name',
-                        placeHolder: 'e.g. Snippets, Commands, Docs'
-                    });
-
-                    if (!subfolderName) return undefined;
-
-                    const newSubfolder: NavigatorCategoryItem = {
-                        label: subfolderName,
-                        type: 'folder',
-                        expanded: true,
-                        items: [],
-                        collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
-                        filePath: ''
-                    };
-
-                    if (!targetCategory.items) targetCategory.items = [];
-                    targetCategory.items.push(newSubfolder);
-                    return newSubfolder;
-                }
-                else if (placement.label !== 'Add to root') {
-                    const subcategory = targetCategory.items.find(
-                        (item): item is NavigatorCategoryItem =>
-                            item.type === 'folder' && item.label === placement.label
-                    );
-                    return subcategory;
-                }
-            }
-
-            // Ensure items array exists for the target category
-            if (!targetCategory.items) {
-                targetCategory.items = [];
-            }
-
-            return targetCategory;
-        } catch (error) {
-            vscode.window.showErrorMessage(
-                `Error selecting category: ${error instanceof Error ? error.message : String(error)}`
-            );
-            return undefined;
         }
-    }
+    };
+
+
     view.title = "F/F Navigator";
     setTimeout(() => {
         if (!view.visible) {

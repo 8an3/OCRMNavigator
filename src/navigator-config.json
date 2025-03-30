@@ -255,7 +255,24 @@
       "label": "SNIPPETS",
       "type": "folder",
       "expanded": true,
-      "items": [],
+      "items": [
+        {
+          "label": "toggle state",
+          "path": ".vscode/ocrmnavigator.code-snippets",
+          "type": "file",
+          "collapsibleState": 0,
+          "filePath": "toggle-state"
+
+        },
+        {
+          "label": "user auth",
+          "path": ".vscode/ocrmnavigator.code-snippets",
+          "type": "file",
+          "collapsibleState": 0,
+          "filePath": "user-auth"
+
+        }
+      ],
       "collapsibleState": 1,
       "filePath": ""
     },

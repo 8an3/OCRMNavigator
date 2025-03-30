@@ -3,7 +3,7 @@
   "name": "ocrmnavigator",
   "displayName": "OCRMNavigator",
   "description": "",
-  "version": "1.0.3",
+  "version": "1.0.6",
   "repository": {
     "type": "git",
     "url": "git@github.com:8an3/OCRMNavigator.git"
@@ -137,11 +137,6 @@
         "category": "OCRM Navigator"
       },
       {
-        "command": "ocrmnavigator.editSnippet",
-        "title": "Edit Snippet",
-        "category": "OCRM Navigator"
-      },
-      {
         "command": "ocrmnavigator.deleteSnippet",
         "title": "Delete Snippet",
         "category": "OCRM Navigator"
@@ -174,6 +169,17 @@
       {
         "command": "ocrmnavigator.setMoveTarget",
         "title": "Select as Move Destination",
+        "category": "OCRM Navigator"
+      },
+      {
+        "command": "ocrmnavigator.createMD",
+        "title": "Create MD",
+        "category": "OCRM Navigator"
+      }
+      ,
+      {
+        "command": "ocrmnavigator.editSnippet",
+        "title": "Edit Snippet",
         "category": "OCRM Navigator"
       }
      
@@ -295,16 +301,10 @@
           "when": "view == ocrmnavigatorNavigator && viewItem == 'url'",
           "category": "OCRM Navigator"
         } ,
-
         {
           "command": "ocrmnavigator.createSnippet",
           "when": "view == ocrmnavigatorNavigator && viewItem == category",
           "group": "navigation"
-        },
-        {
-          "command": "ocrmnavigator.editSnippet",
-          "when": "view == ocmnavigatorView && viewItem.label == '*.md'",
-          "group": "snippets"
         },
         {
           "command": "ocrmnavigator.moveItem",
@@ -315,6 +315,16 @@
           "command": "ocrmnavigator.setMoveTarget",
           "when": "view == ocrmnavigatorNavigator && viewItem == folder",
           "group": "navigation@2"
+        },
+        {
+          "command": "ocrmnavigator.createMD",
+          "when": "view == ocrmnavigatorNavigator && viewItem == category",
+          "group": "navigation"
+        },
+        {
+          "command": "ocrmnavigator.editSnippet",
+          "when": "view == ocrmnavigatorNavigator",
+          "group": "navigation"
         }
      
       ],

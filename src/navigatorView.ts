@@ -36,7 +36,7 @@ export class NavigatorItem extends vscode.TreeItem {
     public collapsibleState: vscode.TreeItemCollapsibleState,
     public filePath: string = '',
     public type?: 'file' | 'url' | 'command' | 'category' | 'folder',
-    public hasChildren?: boolean
+    public hasChildren?: boolean,
   ) {
     super(label, collapsibleState);
     this.contextValue = type || 'file';
