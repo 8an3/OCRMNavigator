@@ -1,4 +1,3 @@
-// src/navigatorView.ts
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -13,9 +12,7 @@ import * as fs from 'fs';
 } */
 
 
-export interface NavigatorConfig {
-  categories: NavigatorCategoryItem[];
-}
+export interface NavigatorConfig { categories: NavigatorCategoryItem[]; }
 
 export interface NavigatorItem {
   label: string;
@@ -28,9 +25,9 @@ export interface NavigatorItem {
 }
 
 export interface NavigatorCategoryItem extends NavigatorItem {
-  readonly type: 'category';
+  readonly type: 'folder';
   expanded: boolean;
-  items: NavigatorItem[];  // This can remain non-readonly if you need to modify it
+  items: NavigatorItem[];
 }
 
 export class NavigatorItem extends vscode.TreeItem {
@@ -39,13 +36,11 @@ export class NavigatorItem extends vscode.TreeItem {
     public collapsibleState: vscode.TreeItemCollapsibleState,
     public filePath: string = '',
     public type?: 'file' | 'url' | 'command' | 'category' | 'folder',
-    public children?: NavigatorItem[]
+    public hasChildren?: boolean
   ) {
     super(label, collapsibleState);
-
     this.contextValue = type || 'file';
 
-    
     if (type === 'file') {
       this.command = {
         command: 'vscode.open',
@@ -53,28 +48,23 @@ export class NavigatorItem extends vscode.TreeItem {
         title: 'Open File'
       };
       this.iconPath = new vscode.ThemeIcon('file');
-    }
-    else if (type === 'url') {
+    } else if (type === 'url') {
       this.command = {
         command: 'vscode.open',
         arguments: [vscode.Uri.parse(filePath)],
         title: 'Open URL'
       };
       this.iconPath = new vscode.ThemeIcon('link-external');
-    }
-    else if (type === 'command') {
+    } else if (type === 'command') {
       this.command = {
         command: 'ocrmnavigator.executeCommand',
         arguments: [this],
         title: 'Run: ' + label
       };
       this.iconPath = new vscode.ThemeIcon('terminal');
-    }
-    else if (type === 'category') {
+    } else if (type === 'folder') {
       this.iconPath = new vscode.ThemeIcon('folder');
- 
-    }
-    else {
+    } else {
       this.iconPath = new vscode.ThemeIcon('file');
     }
 
@@ -88,23 +78,16 @@ export class NavigatorProvider implements vscode.TreeDataProvider<NavigatorItem>
   public config: NavigatorConfig | null = null;
   private configWatcher: vscode.FileSystemWatcher;
 
-  constructor(
-    private workspaceRoot: string,
-    private configPath: string
-  ) {
+  constructor(private workspaceRoot: string, private configPath: string) {
     this.configWatcher = vscode.workspace.createFileSystemWatcher(configPath);
     this.configWatcher.onDidChange(() => this.loadConfig());
     this.configWatcher.onDidCreate(() => this.loadConfig());
-    this.configWatcher.onDidDelete(() => {
-      this.config = null;
-      this.refresh();
-    });
+    this.configWatcher.onDidDelete(() => { this.config = null; this.refresh(); });
     this.loadConfig();
   }
 
   public loadConfig() {
     try {
-      console.log('Loading config from:', this.configPath);
       const configContent = fs.readFileSync(this.configPath, 'utf8');
       const config = JSON.parse(configContent) as NavigatorConfig;
 
@@ -132,30 +115,14 @@ export class NavigatorProvider implements vscode.TreeDataProvider<NavigatorItem>
     }
   }
 
-  getFirstItem(): NavigatorItem | undefined {
-    return this.firstItem;
-  }
-
-  refresh(): void {
-    this._onDidChangeTreeData.fire();
-  }
-
-  getTreeItem(element: NavigatorItem): vscode.TreeItem {
-    return element;
-  }
+  getFirstItem(): NavigatorItem | undefined { return this.firstItem; }
+  refresh(): void { this._onDidChangeTreeData.fire(); }
+  getTreeItem(element: NavigatorItem): vscode.TreeItem { return element; }
 
   getChildren(element?: NavigatorItem): Thenable<NavigatorItem[]> {
     console.log('getChildren called', element ? `for ${element.label}` : 'for root');
 
-    if (element?.children) {
-      return Promise.resolve(element.children);
-    }
-
-    if (!this.workspaceRoot) {
-      console.log('No workspace opened');
-      vscode.window.showInformationMessage('No workspace opened');
-      return Promise.resolve([]);
-    }
+    if (element?.children) { return Promise.resolve(element.children); }
 
     if (!this.config) {
       console.log('No config loaded');
@@ -168,15 +135,12 @@ export class NavigatorProvider implements vscode.TreeDataProvider<NavigatorItem>
     }
 
     if (!element) {
-      // Root categories - ensure categories exists
       const items = (this.config.categories || []).map(category => {
         return new NavigatorItem(
           category.label,
-          category.expanded ?
-            vscode.TreeItemCollapsibleState.Expanded :
-            vscode.TreeItemCollapsibleState.Collapsed,
+          category.expanded?  vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed,
           '',
-          'category'
+          'folder'
         );
       });
 
@@ -187,46 +151,73 @@ export class NavigatorProvider implements vscode.TreeDataProvider<NavigatorItem>
       return Promise.resolve(items);
     }
 
-    // Find the category with null checks
-    const category = this.config.categories?.find(c => c.label === element.label);
+    // Handle category items
+    const category = this.config.categories?.find(c => c.label === element.label) as NavigatorCategoryItem;
     if (category) {
-      // Handle case where items might be undefined
       const categoryItems = category.items || [];
       return Promise.resolve(
-        categoryItems.map(item => this.createFileItem(
-          item.label,
-          item.path || '',
-          item.type || 'file' // Explicitly pass undefined if type is not specified
-        ))
+        categoryItems.map(item => {
+          // Check if this item is a folder
+          if (item.type === 'folder') {
+            // Cast to NavigatorCategoryItem to access its properties properly
+            const folderItem = item as NavigatorCategoryItem;
+
+            const navItem = new NavigatorItem(
+              folderItem.label,
+              folderItem.expanded?  vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed,
+              folderItem.filePath || '',
+              'folder',
+              true
+            );
+
+            // Create the children for this folder
+            navItem.children = (folderItem.items || []).map(subItem =>
+              this.createFileItem(
+                subItem.label,
+                subItem.path || '',
+                subItem.type || 'file'
+              )
+            );
+
+            return navItem;
+          }
+
+          // For non-folder items
+          return this.createFileItem(
+            item.label,
+            item.path || '',
+            item.type || 'file'
+          );
+        })
       );
     }
 
     return Promise.resolve([]);
   }
 
-  // Add this to the NavigatorProvider class
-  private ensureFileExists(filePath: string): boolean {
-    try {
-      return fs.existsSync(filePath);
-    } catch {
-      return false;
-    }
-  }
 
-  private createFileItem(label: string, pathOrCmd: string, type?: string): NavigatorItem {
+  private createFileItem(
+    label: string,
+    pathOrCmd: string,
+    type?: string,
+    items?: NavigatorItem[],
+    expanded?: boolean
+  ): NavigatorItem {
+    const fullPath = path.isAbsolute(pathOrCmd)
+      ? pathOrCmd
+      : path.join(this.workspaceRoot, pathOrCmd);
+
     if (!type) {
-      if (pathOrCmd.match(/^https?:\/\//)) type = 'url';
-      else if (pathOrCmd.match(/^[\w\.]+\.[\w\.]+$/)) type = 'file';
-      else type = 'command';
+      if (pathOrCmd.match(/^https?:\/\//)) {
+        type = 'url';
+      } else if (pathOrCmd.startsWith('command:')) {
+        type = 'command';
+      } else {
+        type = 'file';
+      }
     }
-  
-    const fullPath = path.join(this.workspaceRoot, pathOrCmd);
-  
-    // Handle directories
-    if (!type && fs.existsSync(fullPath) && fs.statSync(fullPath).isDirectory()) {
-      type = 'folder';
-    }
-  
+
+
     if (type === 'url') {
       return new NavigatorItem(
         label,
@@ -234,26 +225,31 @@ export class NavigatorProvider implements vscode.TreeDataProvider<NavigatorItem>
         pathOrCmd,
         'url'
       );
-    }
-    else if (type === 'command') {
+    } else if (type === 'command') {
       return new NavigatorItem(
         label,
         vscode.TreeItemCollapsibleState.None,
         pathOrCmd,
         'command'
       );
-    }
-    else if (type === 'folder') {
-      return new NavigatorItem(
+    } else if (type === 'folder' && items) {
+      const folderItem = new NavigatorItem(
         label,
-        vscode.TreeItemCollapsibleState.Collapsed,
-        fullPath,
+        expanded
+          ? vscode.TreeItemCollapsibleState.Expanded
+          : vscode.TreeItemCollapsibleState.Collapsed,
+        pathOrCmd || '',
         'folder',
-        this.getDirectoryItems(fullPath)  // Get children items
+        true
       );
-    } 
-    else {
-      // File handling
+
+      // Create children for the virtual folder
+      folderItem.children = items.map(item =>
+        this.createFileItem(item.label, item.path || '', item.type)
+      );
+
+      return folderItem;
+    } else {
       const exists = fs.existsSync(fullPath);
       const item = new NavigatorItem(
         label,
@@ -261,7 +257,7 @@ export class NavigatorProvider implements vscode.TreeDataProvider<NavigatorItem>
         fullPath,
         'file'
       );
-  
+
       if (!exists) {
         item.contextValue = 'missing';
         item.iconPath = new vscode.ThemeIcon('warning');
@@ -271,33 +267,11 @@ export class NavigatorProvider implements vscode.TreeDataProvider<NavigatorItem>
           title: 'Fix Path in Config'
         };
       }
-  
+
       return item;
     }
   }
 
 
-  private getDirectoryItems(dirPath: string): NavigatorItem[] {
-    try {
-      if (!fs.existsSync(dirPath)) return [];
-  
-      return fs.readdirSync(dirPath).map(itemName => {
-        const itemPath = path.join(dirPath, itemName);
-        const isDirectory = fs.statSync(itemPath).isDirectory();
-        
-        return new NavigatorItem(
-          itemName,
-          isDirectory ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None,
-          itemPath,
-          isDirectory ? 'folder' : 'file',
-          isDirectory ? this.getDirectoryItems(itemPath) : undefined
-        );
-      });
-    } catch (error) {
-      console.error(`Error reading directory ${dirPath}:`, error);
-      return [];
-    }
-  }
-  
   dispose() { this.configWatcher.dispose(); }
 }

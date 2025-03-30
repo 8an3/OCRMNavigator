@@ -110,9 +110,33 @@
       {
         "command": "ocrmnavigator.addCommandToCategory",
         "title": "Add Command",
-            "icon": "$(terminal)"
+        "icon": "$(terminal)"
+      },
+      {
+        "command": "ocrmnavigator.collapseFolder",
+        "title": "Collapse Folder",
+        "category": "OCRM Navigator"
+      },
+      {
+        "command": "ocrmnavigator.expandFolder",
+        "title": "Expand Folder",
+        "category": "OCRM Navigator"
+      },
+      {
+        "command": "ocrmnavigator.createSnippet",
+        "title": "Create New Snippet",
+        "category": "OCRM Navigator"
+      },
+      {
+        "command": "ocrmnavigator.editSnippet",
+        "title": "Edit Snippet",
+        "category": "OCRM Navigator"
+      },
+      {
+        "command": "ocrmnavigator.deleteSnippet",
+        "title": "Delete Snippet",
+        "category": "OCRM Navigator"
       }
-     
     ],
     "views": {
       "explorer": [
@@ -208,8 +232,33 @@
         },
         {
           "command": "ocrmnavigator.addCommandToCategory",
-          "when": "view == ocrmnavigatorNavigator && viewItem == category && viewItem.label == 'CMDS'",
+          "when": "view == ocrmnavigatorNavigator && viewItem == folder && viewItem.label == 'CMDS'",
           "group": "inline"
+        },
+        {
+          "command": "ocrmnavigator.expandFolder",
+          "when": "view == ocmnavigatorView && viewItem == folder",
+          "group": "navigation"
+        },
+        {
+          "command": "ocrmnavigator.collapseFolder",
+          "when": "view == ocmnavigatorView && viewItem == folder",
+          "group": "navigation"
+        },
+        {
+          "command": "ocrmnavigator.createSnippet",
+          "when": "view == ocrmnavigatorNavigator && viewItem == category",
+          "group": "navigation"
+        },
+        {
+          "command": "ocrmnavigator.editSnippet",
+          "when": "view == ocmnavigatorView && viewItem.label == '*.md'",
+          "group": "snippets"
+        },
+        {
+          "command": "ocrmnavigator.deleteSnippet",
+          "when": "view == ocmnavigatorView && viewItem.label == '*.md'",
+          "group": "snippets"
         }
       ],
       "explorer/context": [
@@ -255,6 +304,45 @@
           "when": "view == ocrmnavigatorNavigator",
           "group": "navigation@3",
           "icon": "$(terminal)"
+        },
+        {
+          "command": "ocrmnavigator.createSnippet",
+          "when": "view == ocrmnavigatorNavigator",
+          "group": "navigation"
+        },
+        {
+          "command": "ocrmnavigator.createSnippet",
+          "when": "view == ocrmnavigatorNavigator",
+          "group": "navigation@1"
+        },
+        {
+          "command": "ocrmnavigator.addCommand",
+          "when": "view == ocrmnavigatorNavigator",
+          "group": "navigation@2"
+        },
+        {
+          "command": "ocrmnavigator.refresh",
+          "when": "view == ocrmnavigatorNavigator",
+          "group": "navigation@3"
+        },
+        {
+          "submenu": "ocrmnavigator.actions",
+          "when": "view == ocrmnavigatorNavigator",
+          "group": "navigation"
+        }
+      ],
+      "ocrmnavigator.actions": [
+        {
+          "command": "ocrmnavigator.createSnippet",
+          "title": "Create New Snippet"
+        },
+        {
+          "command": "ocrmnavigator.addCommand",
+          "title": "Add New Command"
+        },
+        {
+          "command": "ocrmnavigator.refresh",
+          "title": "Refresh View"
         }
       ]
     }

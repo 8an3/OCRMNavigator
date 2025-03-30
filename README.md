@@ -5,20 +5,20 @@
 
 A VS Code extension for bookmarking files, among other things. Bookmark file locations to gain easy painless access to whatever file needed no matter how many folders deep they are. Categorize bookmarks however you see fit, whether by priority or category. Now also letting you bookmark urls for even quicker access to sites you visit the most while coding. Whether it be for refrencing apis or throwing on your next tune on youtube, all from your explorer pane.
 
-## Features
+## Bookmark types
+- Files
+- URLs
+- Commands
+- Snippets ( Created snippets saved locally )
+- .md files
+- Pre-made most used components and functions
 
-### Commands 
-### Commands 
-### Commands 
-### Commands 
-### Commands 
-### Commands 
-### Commands 
 ### Commands 
 ### snippets 
-select create snippet > input name of snippt > ask user to select snippet category to save under so under the snippets folder there will be another set of folders to save under to categorize the snippet or they can save in the main snippets folder > opens empty file to input the snippet > on save saves file
+
 ### Commands like show terminal collapese 1 2 3 4 unfold all save all
 
+## Files
 ### File Management
 - Add files to custom categories
 - Edit display labels for files
@@ -41,9 +41,7 @@ select create snippet > input name of snippt > ask user to select snippet catego
 - Copy config file to current root folder
 - Upload configuration file
 
-### Web Links
-- Quickly add web links to navigator
-- Edit url links
+
 
 ## Installation
 

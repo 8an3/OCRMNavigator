@@ -3,6 +3,7 @@
     {
       "label": "CMDS",
       "expanded": false,
+      "type": "folder",
       "items": [
         {
           "label": "Save All",
@@ -46,10 +47,9 @@
         },
         {
           "label": "Other CMDS",
-          "type": "category",
+          "type": "folder",
           "expanded": false,
           "items": [],
-          "collapsibleState": 1,
           "filePath": ""
         }
       ]
@@ -57,6 +57,7 @@
     {
       "label": "DASHBOARDS",
       "expanded": true,
+      "type": "folder",
       "items": [
         {
           "label": "Admin Dashboard",
@@ -98,6 +99,7 @@
     {
       "label": "RELATED",
       "expanded": false,
+      "type": "folder",
       "items": [
         {
           "label": "client.website",
@@ -114,6 +116,7 @@
     {
       "label": "COMPONENTS",
       "expanded": false,
+      "type": "folder",
       "items": [
         {
           "label": "app.sidebar",
@@ -135,12 +138,8 @@
     {
       "label": "UTILS",
       "expanded": false,
+      "type": "folder",
       "items": [
-        {
-          "label": "loader.server",
-          "path": "apps/app/app/utils/loader.server.tsx",
-          "type": "file"
-        },
         {
           "label": "app.env",
           "path": "apps/app/.env",
@@ -171,12 +170,8 @@
     {
       "label": "shadCN",
       "expanded": false,
+      "type": "folder",
       "items": [
-        {
-          "label": "loader.server",
-          "path": "apps/app/app/utils/loader.server.tsx",
-          "type": "file"
-        },
         {
           "label": "app.env",
           "path": "apps/app/.env",
@@ -207,6 +202,7 @@
     {
       "label": "WEB",
       "expanded": true,
+      "type": "folder",
       "items": [
         {
           "label": "localhost sales dash",
@@ -257,27 +253,35 @@
     },
     {
       "label": "SNIPPETS",
-      "expanded": false,
+      "type": "folder",
+      "expanded": true,
+      "items": [],
+      "collapsibleState": 1,
+      "filePath": ""
+    },
+    {
+      "label": "App Ideas",
+      "type": "folder",
+      "expanded": true,
       "items": [
         {
-          "label": "Other CMDS",
-          "type": "category",
-          "expanded": false,
-          "items": [],
-          "collapsibleState": 1,
-          "filePath": ""
-        },
-        {
-          "label": "copy snippet to clipboard when clicked",
-          "path": "apps/app/app/utils/loader.server.tsx",
-          "type": "snippet"
-        },
-        {
-          "label": "loader.server",
-          "path": "apps/app/app/utils/loader.server.tsx",
-          "type": "snippet"
+          "label": "appIdeas.lawyerApp",
+          "path": "code\\notes\\appIdeas.lawyerApp.md",
+          "type": "file",
+          "collapsibleState": 0,
+          "filePath": "code\\notes\\appIdeas.lawyerApp.md"
         }
-      ]
+      ],
+      "collapsibleState": 1,
+      "filePath": ""
+    },
+    {
+      "label": "Dev Map",
+      "type": "folder",
+      "expanded": true,
+      "items": [],
+      "collapsibleState": 1,
+      "filePath": ""
     }
   ]
 }
