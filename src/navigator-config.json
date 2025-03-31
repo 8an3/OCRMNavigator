@@ -2,114 +2,269 @@
   "categories": [
     {
       "label": "CMDS",
-      "expanded": false,
+      "expanded": true,
       "type": "folder",
       "items": [
         {
-          "label": "Save All",
+          "label": "toggle terminal",
+          "path": "workbench.action.terminal.toggleTerminal",
+          "type": "command",
+          "collapsibleState": 0,
+          "filePath": ""
+        },
+        {
+          "label": "save all",
           "path": "workbench.action.files.saveAll",
           "type": "command"
         },
         {
-          "label": "Format",
+          "label": "format",
           "path": "editor.action.formatDocument",
           "type": "command"
         },
         {
-          "label": "Fold 1",
+          "label": "fold 1",
           "path": "editor.foldLevel1",
           "type": "command"
         },
         {
-          "label": "Fold 2",
+          "label": "fold 2",
           "path": "editor.foldLevel2",
           "type": "command"
         },
         {
-          "label": "Fold 3",
+          "label": "fold 3",
           "path": "editor.foldLevel3",
           "type": "command"
         },
         {
-          "label": "Fold 4",
-          "path": "editor.foldLevel4",
-          "type": "command"
-        },
-        {
-          "label": "Fold 5",
-          "path": "editor.foldLevel5",
-          "type": "command"
-        },
-        {
-          "label": "Unfold",
-          "path": "editor.unfold",
-          "type": "command"
-        },
-        {
-          "label": "Other CMDS",
+          "label": "other",
           "type": "folder",
           "expanded": false,
-          "items": [],
+          "items": [
+            {
+              "label": "fold 4",
+              "path": "editor.foldLevel4",
+              "type": "command"
+            },
+            {
+              "label": "fold 5",
+              "path": "editor.foldLevel5",
+              "type": "command"
+            },
+            {
+              "label": "ufold",
+              "path": "editor.unfold",
+              "type": "command"
+            },
+            {
+              "label": "close all editors",
+              "path": "workbench.action.closeAllEditors",
+              "type": "command"
+            },
+            {
+              "label": "toggle word wrap",
+              "path": "editor.action.toggleWordWrap",
+              "type": "command"
+            },
+            {
+              "label": "show commands",
+              "path": "workbench.action.showCommands",
+              "type": "command"
+            },
+            {
+              "label": "toggle zen mode",
+              "path": "workbench.action.toggleZenMode",
+              "type": "command"
+            },
+            {
+              "label": "git init",
+              "path": "git.init",
+              "type": "command"
+            },
+            {
+              "label": "git commitAll",
+              "path": "git.commitAll",
+              "type": "command"
+            }
+          ],
+          "collapsibleState": 1,
+          "filePath": ""
+        },
+        {
+          "label": "terminal",
+          "type": "folder",
+          "expanded": false,
+          "items": [
+            {
+              "label": "app dev",
+              "path": "meth dev:app",
+              "type": "powershellCommand",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "app patch",
+              "path": "meth patch:app",
+              "type": "powershellCommand",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "app db",
+              "path": "meth db:app",
+              "type": "powershellCommand",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "app clean",
+              "path": "meth db:app",
+              "type": "powershellCommand",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "app db",
+              "path": "meth db:app",
+              "type": "powershellCommand",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "all clean",
+              "path": "meth clean:all",
+              "type": "powershellCommand",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "all i",
+              "path": "meth clean:all",
+              "type": "powershellCommand",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "all build",
+              "path": "meth clean:all",
+              "type": "powershellCommand",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "all patch",
+              "path": "meth clean:all",
+              "type": "powershellCommand",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "all push:",
+              "path": "meth clean:all",
+              "type": "powershellCommand",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "all dev",
+              "path": "meth clean:all",
+              "type": "powershellCommand",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "all db",
+              "path": "meth clean:all",
+              "type": "powershellCommand",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "all gen",
+              "path": "meth clean:all",
+              "type": "powershellCommand",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "all build",
+              "path": "meth clean:all",
+              "type": "powershellCommand",
+              "collapsibleState": 0,
+              "filePath": ""
+            }
+          ],
+          "collapsibleState": 1,
           "filePath": ""
         }
       ]
     },
     {
-      "label": "DASHBOARDS",
+      "label": "PRIMARY",
       "expanded": true,
       "type": "folder",
       "items": [
         {
-          "label": "Admin Dashboard",
+          "label": "admin dash",
           "path": "apps/app/app/routes/portal/$dept/settings/general.tsx",
           "type": "file"
         },
         {
-          "label": "Client Dashboard",
+          "label": "client dash",
           "path": "apps/app/app/routes/client/portal/sales/dashboard.tsx",
           "type": "file"
         },
         {
-          "label": "Dev Dashboard",
+          "label": "dev dash",
           "path": "apps/app/app/routes/portal/dev/dashboard/home.tsx",
           "type": "file"
         },
         {
-          "label": "PAC Dashboard",
+          "label": "pac dash",
           "path": "apps/app/app/routes/portal/accessories/dashboard.tsx",
           "type": "file"
         },
         {
-          "label": "Service Dashboard",
+          "label": "service dash",
           "path": "apps/app/app/routes/portal/service/dashboard.tsx",
           "type": "file"
         },
         {
-          "label": "Sales Dashboard",
+          "label": "sales dash",
           "path": "apps/app/app/routes/portal/sales/dashboard/clients.tsx",
           "type": "file"
         },
         {
-          "label": "User Dashboard",
+          "label": "user dash",
           "path": "apps/app/app/routes/portal/user/dashboard.settings.tsx",
           "type": "file"
         }
       ]
     },
     {
-      "label": "RELATED",
+      "label": "SECONDARY",
       "expanded": false,
       "type": "folder",
       "items": [
         {
-          "label": "client.website",
-          "path": "apps/app/app/routes/dealer/client/home.tsx",
+          "label": "sales unit file",
+          "path": "apps/app/app/routes/portal/sales/customer/$clientId/$financeId.tsx",
           "type": "file"
         },
         {
-          "label": "unit.file",
-          "path": "apps/app/app/routes/portal/sales/customer/$clientId/$financeId.tsx",
-          "type": "file"
+          "label": "client facing website",
+          "path": "apps\\app\\app\\routes\\client\\portal\\sales\\dashboard.tsx",
+          "type": "file",
+          "collapsibleState": 0,
+          "filePath": "apps\\app\\app\\routes\\client\\portal\\sales\\dashboard.tsx"
+        },
+        {
+          "label": "email client",
+          "path": "apps\\app\\app\\routes\\portal\\email\\client.tsx",
+          "type": "file",
+          "collapsibleState": 0,
+          "filePath": "apps\\app\\app\\routes\\portal\\email\\client.tsx"
         }
       ]
     },
@@ -119,18 +274,13 @@
       "type": "folder",
       "items": [
         {
-          "label": "app.sidebar",
+          "label": "app sidebar",
           "path": "apps/app/app/routes/__component/appSidebar.tsx",
           "type": "file"
         },
         {
-          "label": "components.shared",
+          "label": "sared shared",
           "path": "apps/app/app/components/shared/shared.tsx",
-          "type": "file"
-        },
-        {
-          "label": "unit.file",
-          "path": "apps/app/app/routes/dealer/client/home.tsx",
           "type": "file"
         }
       ]
@@ -141,74 +291,54 @@
       "type": "folder",
       "items": [
         {
-          "label": "app.env",
-          "path": "apps/app/.env",
-          "type": "file"
-        },
-        {
-          "label": "app.packageJSON",
-          "path": "apps/app/package.json",
-          "type": "file"
-        },
-        {
-          "label": "app.schemaPrisma",
-          "path": "apps/app/prisma/schema.prisma",
-          "type": "file"
-        },
-        {
-          "label": "app.seed",
-          "path": "apps/app/prisma/seed.ts",
-          "type": "file"
-        },
-        {
           "label": "meth.json",
           "path": "meth.json",
-          "type": "file"
-        }
-      ]
-    },
-    {
-      "label": "shadCN",
-      "expanded": false,
-      "type": "folder",
-      "items": [
-        {
-          "label": "app.env",
-          "path": "apps/app/.env",
-          "type": "file"
+          "type": "file",
+          "collapsibleState": 0,
+          "filePath": "meth.json"
         },
         {
-          "label": "app.packageJSON",
-          "path": "apps/app/package.json",
-          "type": "file"
+          "label": "package.json",
+          "path": "apps\\app\\package.json",
+          "type": "file",
+          "collapsibleState": 0,
+          "filePath": "apps\\app\\package.json"
         },
         {
-          "label": "app.schemaPrisma",
-          "path": "apps/app/prisma/schema.prisma",
-          "type": "file"
+          "label": ".env",
+          "path": "apps\\app\\.env",
+          "type": "file",
+          "collapsibleState": 0,
+          "filePath": "apps\\app\\.env"
         },
         {
-          "label": "app.seed",
-          "path": "apps/app/prisma/seed.ts",
-          "type": "file"
+          "label": "schema.prisma",
+          "path": "apps\\app\\prisma\\schema.prisma",
+          "type": "file",
+          "collapsibleState": 0,
+          "filePath": "apps\\app\\prisma\\schema.prisma"
         },
         {
-          "label": "meth.json",
-          "path": "meth.json",
-          "type": "file"
+          "label": "seed.ts",
+          "path": "apps\\app\\prisma\\seed.ts",
+          "type": "file",
+          "collapsibleState": 0,
+          "filePath": "apps\\app\\prisma\\seed.ts"
+        },
+        {
+          "label": "loader.server.ts",
+          "path": "apps\\app\\app\\utils\\loader.server.ts",
+          "type": "file",
+          "collapsibleState": 0,
+          "filePath": "apps\\app\\app\\utils\\loader.server.ts"
         }
       ]
     },
     {
       "label": "WEB",
-      "expanded": true,
+      "expanded": false,
       "type": "folder",
       "items": [
-        {
-          "label": "localhost sales dash",
-          "path": "http://localhost:3000/portal/sales/dashboard/clients",
-          "type": "url"
-        },
         {
           "label": "Firrrre",
           "path": "https://www.youtube.com/watch?v=zDvrYIOl0lU&list=PLYHhlbShmci1msPMnO-vg_aq1HISmBAa6&index=62",
@@ -225,29 +355,84 @@
           "type": "url"
         },
         {
-          "label": "shad",
-          "path": "https://ui.shadcn.com/docs/components/accordion",
-          "type": "url"
+          "label": "LOCALHOST",
+          "type": "folder",
+          "expanded": true,
+          "items": [
+            {
+              "label": "client facing site",
+              "path": "http://localhost:3000/dealer/client/home",
+              "type": "url"
+            },
+            {
+              "label": "client portal",
+              "path": "http://localhost:3000/client/portal/sales/dashboard",
+              "type": "url"
+            },
+            {
+              "label": "sales dash",
+              "path": "http://localhost:3000/portal/sales/dashboard/clients",
+              "type": "url"
+            },
+            {
+              "label": "pac dash",
+              "path": "http://localhost:3000/portal/accessories/dashboard",
+              "type": "url"
+            },
+            {
+              "label": "service dash",
+              "path": "http://localhost:3000/portal/service/dashboard",
+              "type": "url"
+            },
+            {
+              "label": "dev dash",
+              "path": "http://localhost:3000/portal/dev/dashboard/home",
+              "type": "url"
+            }
+          ],
+          "collapsibleState": 1,
+          "filePath": ""
         },
         {
-          "label": "radix",
-          "path": "https://www.radix-ui.com/primitives/docs/components/dialog",
-          "type": "url"
-        },
-        {
-          "label": "vercel",
-          "path": "https://vercel.com/eights-projects",
-          "type": "url"
-        },
-        {
-          "label": "lucide",
-          "path": "https://lucide.dev/icons/",
-          "type": "url"
-        },
-        {
-          "label": "Manage VS Extensions",
-          "path": "https://marketplace.visualstudio.com/manage/publishers/skyler?auth_redirect=True",
-          "type": "url"
+          "label": "OTHER",
+          "type": "folder",
+          "expanded": true,
+          "items": [
+            {
+              "label": "shad",
+              "path": "https://ui.shadcn.com/docs/components/accordion",
+              "type": "url"
+            },
+            {
+              "label": "lucide",
+              "path": "https://lucide.dev/icons/",
+              "type": "url"
+            },
+            {
+              "label": "vercel",
+              "path": "https://vercel.com/eights-projects",
+              "type": "url"
+            },
+            {
+              "label": "Manage VS Extensions",
+              "path": "https://marketplace.visualstudio.com/manage/publishers/skyler?auth_redirect=True",
+              "type": "url"
+            },
+            {
+              "label": "radix",
+              "path": "https://www.radix-ui.com/primitives/docs/components/dialog",
+              "type": "url"
+            },
+            {
+              "label": "gmail",
+              "path": "https://mail.google.com/mail/u/0/#all",
+              "type": "url",
+              "collapsibleState": 0,
+              "filePath": "https://mail.google.com/mail/u/0/#all"
+            }
+          ],
+          "collapsibleState": 1,
+          "filePath": ""
         }
       ]
     },
@@ -257,46 +442,233 @@
       "expanded": true,
       "items": [
         {
-          "label": "toggle state",
-          "path": ".vscode/ocrmnavigator.code-snippets",
-          "type": "file",
-          "collapsibleState": 0,
-          "filePath": "toggle-state"
-
+          "label": "shadCN",
+          "type": "folder",
+          "expanded": false,
+          "items": [
+         
+          ],
+          "collapsibleState": 1,
+          "filePath": ""
         },
         {
-          "label": "user auth",
-          "path": ".vscode/ocrmnavigator.code-snippets",
-          "type": "file",
-          "collapsibleState": 0,
-          "filePath": "user-auth"
-
+          "label": "FUNCTIONS",
+          "type": "folder",
+          "expanded": false,
+          "items": [],
+          "collapsibleState": 1,
+          "filePath": ""
+        },
+        {
+          "label": "ONE LINERS",
+          "type": "folder",
+          "expanded": false,
+          "items": [],
+          "collapsibleState": 1,
+          "filePath": ""
+        },
+        {
+          "label": "RANDOM",
+          "type": "folder",
+          "expanded": false,
+          "items": [],
+          "collapsibleState": 1,
+          "filePath": ""
+        },
+        {
+          "label": "SCRIPTS",
+          "type": "folder",
+          "expanded": false,
+          "items": [],
+          "collapsibleState": 1,
+          "filePath": ""
         }
       ],
       "collapsibleState": 1,
       "filePath": ""
     },
     {
-      "label": "App Ideas",
+      "label": "DEV MAP",
       "type": "folder",
       "expanded": true,
       "items": [
         {
-          "label": "appIdeas.lawyerApp",
-          "path": "code\\notes\\appIdeas.lawyerApp.md",
+          "label": "devMap",
+          "path": ".vscode\\.md\\devMap.md",
           "type": "file",
           "collapsibleState": 0,
-          "filePath": "code\\notes\\appIdeas.lawyerApp.md"
+          "filePath": ".vscode\\.md\\devMap.md"
+        },
+        {
+          "label": "devMap.automation",
+          "path": ".vscode\\.md\\devMap.automation.md",
+          "type": "file",
+          "collapsibleState": 0,
+          "filePath": ".vscode\\.md\\devMap.automation.md"
+        },
+        {
+          "label": "devMap.backBurner",
+          "path": ".vscode\\.md\\devMap.backBurner.md",
+          "type": "file",
+          "collapsibleState": 0,
+          "filePath": ".vscode\\.md\\devMap.backBurner.md"
+        },
+        {
+          "label": "devMap.clientFacingWebsite",
+          "path": ".vscode\\.md\\devMap.clientFacingWebsite.md",
+          "type": "file",
+          "collapsibleState": 0,
+          "filePath": ".vscode\\.md\\devMap.clientFacingWebsite.md"
+        },
+        {
+          "label": "devMap.completed",
+          "path": ".vscode\\.md\\devMap.completed.md",
+          "type": "file",
+          "collapsibleState": 0,
+          "filePath": ".vscode\\.md\\devMap.completed.md"
+        },
+        {
+          "label": "devMap.dev",
+          "path": ".vscode\\.md\\devMap.dev.md",
+          "type": "file",
+          "collapsibleState": 0,
+          "filePath": ".vscode\\.md\\devMap.dev.md"
+        },
+        {
+          "label": "devMap.googlesSnapchatUploadHack",
+          "path": ".vscode\\.md\\devMap.googlesSnapchatUploadHack.md",
+          "type": "file",
+          "collapsibleState": 0,
+          "filePath": ".vscode\\.md\\devMap.googlesSnapchatUploadHack.md"
+        },
+        {
+          "label": "devMap.ideas",
+          "path": ".vscode\\.md\\devMap.ideas.md",
+          "type": "file",
+          "collapsibleState": 0,
+          "filePath": ".vscode\\.md\\devMap.ideas.md"
+        },
+        {
+          "label": "devMap.issue",
+          "path": ".vscode\\.md\\devMap.issue.md",
+          "type": "file",
+          "collapsibleState": 0,
+          "filePath": ".vscode\\.md\\devMap.issue.md"
+        },
+        {
+          "label": "devMap.priority",
+          "path": ".vscode\\.md\\devMap.priority.md",
+          "type": "file",
+          "collapsibleState": 0,
+          "filePath": ".vscode\\.md\\devMap.priority.md"
         }
       ],
       "collapsibleState": 1,
       "filePath": ""
     },
     {
-      "label": "Dev Map",
+      "label": "OTHER",
       "type": "folder",
       "expanded": true,
-      "items": [],
+      "items": [
+        {
+          "label": "APP IDEAS",
+          "type": "folder",
+          "expanded": false,
+          "items": [
+            {
+              "label": "appIdeas.lawyerApp",
+              "path": ".vscode\\.md\\appIdeas.lawyerApp.md",
+              "type": "file",
+              "collapsibleState": 0,
+              "filePath": ".vscode\\.md\\appIdeas.lawyerApp.md"
+            },
+            {
+              "label": "appIdeas.onlyFans",
+              "path": ".vscode\\.md\\appIdeas.onlyFans.md",
+              "type": "file",
+              "collapsibleState": 0,
+              "filePath": ".vscode\\.md\\appIdeas.onlyFans.md"
+            }
+          ],
+          "collapsibleState": 1,
+          "filePath": ""
+        },
+        {
+          "label": "README",
+          "type": "folder",
+          "expanded": false,
+          "items": [
+            {
+              "label": "README.opinionatedCRM.md",
+              "path": ".vscode\\.md\\README.opinionatedCRM.md",
+              "type": "file",
+              "collapsibleState": 0,
+              "filePath": ".vscode\\.md\\README.opinionatedCRM.md"
+            },
+            {
+              "label": "README.meth.md",
+              "path": ".vscode\\.md\\README.meth.md",
+              "type": "file",
+              "collapsibleState": 0,
+              "filePath": ".vscode\\.md\\README.meth.md"
+            }
+          ],
+          "collapsibleState": 1,
+          "filePath": ""
+        },
+        {
+          "label": "DOCS",
+          "type": "folder",
+          "expanded": false,
+          "items": [
+            {
+              "label": "docs.md",
+              "path": ".vscode\\.md\\docs.md",
+              "type": "file",
+              "collapsibleState": 0,
+              "filePath": ".vscode\\.md\\docs.md"
+            },
+            {
+              "label": "docs.consult.md",
+              "path": ".vscode\\.md\\docs.consult.md",
+              "type": "file",
+              "collapsibleState": 0,
+              "filePath": ".vscode\\.md\\docs.consult.md"
+            },
+            {
+              "label": "docs.env.md",
+              "path": ".vscode\\.md\\docs.env.md",
+              "type": "file",
+              "collapsibleState": 0,
+              "filePath": ".vscode\\.md\\docs.env.md"
+            },
+            {
+              "label": "docs.inClosing.md",
+              "path": ".vscode\\.md\\docs.inClosing.md",
+              "type": "file",
+              "collapsibleState": 0,
+              "filePath": ".vscode\\.md\\docs.inClosing.md"
+            },
+            {
+              "label": "docs.tldr.md",
+              "path": ".vscode\\.md\\docs.tldr.md",
+              "type": "file",
+              "collapsibleState": 0,
+              "filePath": ".vscode\\.md\\docs.tldr.md"
+            },
+            {
+              "label": "docs.tldrButWorth.md",
+              "path": ".vscode\\.md\\docs.tldrButWorth.md",
+              "type": "file",
+              "collapsibleState": 0,
+              "filePath": ".vscode\\.md\\docs.tldrButWorth.md"
+            }
+          ],
+          "collapsibleState": 1,
+          "filePath": ""
+        }
+      ],
       "collapsibleState": 1,
       "filePath": ""
     }

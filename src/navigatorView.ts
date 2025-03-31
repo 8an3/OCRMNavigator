@@ -2,23 +2,13 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 
-/**export interface NavigatorConfig {
-  categories: {
-    filename?: string;
-    items?: {     
-      type?: 'file' | 'url' | 'command' | 'snippet'; // Optional if you want
-    }[];
-  }[];
-} */
-
-
 export interface NavigatorConfig { categories: NavigatorCategoryItem[]; }
 
 export interface NavigatorItem {
   label: string;
   path?: string;
   cmd?: string;
-  type?: 'file' | 'url' | 'command' | 'category' | 'folder' | 'md' | 'snippet';
+  type?: 'file' | 'url' | 'command' | 'category' | 'folder' | 'md' | 'snippet' | 'powershellCommand';
   collapsibleState: vscode.TreeItemCollapsibleState;
   filePath: string;
   children?: NavigatorItem[];
@@ -31,11 +21,13 @@ export interface NavigatorCategoryItem extends NavigatorItem {
 }
 
 export class NavigatorItem extends vscode.TreeItem {
+  public children?: NavigatorItem[];
+
   constructor(
     public label: string,
     public collapsibleState: vscode.TreeItemCollapsibleState,
     public filePath: string = '',
-    public type?: 'file' | 'url' | 'command' | 'category' | 'folder' | 'md' | 'snippet',
+    public type?: 'file' | 'url' | 'command' | 'category' | 'folder' | 'md' | 'snippet' | 'powershellCommand',
     public hasChildren?: boolean,
   ) {
     super(label, collapsibleState);
@@ -76,6 +68,13 @@ export class NavigatorItem extends vscode.TreeItem {
         title: 'Run: ' + label
       };
       this.iconPath = new vscode.ThemeIcon('terminal');
+    } else if (type === 'powershellCommand') {
+      this.command = {
+        command: 'ocrmnavigator.executeItem',
+        arguments: [this],
+        title: 'Run: ' + label
+      };
+      this.iconPath = new vscode.ThemeIcon('play');
     } else if (type === 'folder') {
       this.iconPath = new vscode.ThemeIcon('folder');
     } else {
@@ -167,15 +166,13 @@ export class NavigatorProvider implements vscode.TreeDataProvider<NavigatorItem>
 
     // Handle category items
     const category = this.config.categories?.find(c => c.label === element.label) as NavigatorCategoryItem;
+    // In getChildren method:
     if (category) {
-      const categoryItems = category.items || [];
+      const categoryItems = 'items' in category ? category.items : [];
       return Promise.resolve(
         categoryItems.map(item => {
-          // Check if this item is a folder
           if (item.type === 'folder') {
-            // Cast to NavigatorCategoryItem to access its properties properly
             const folderItem = item as NavigatorCategoryItem;
-
             const navItem = new NavigatorItem(
               folderItem.label,
               folderItem.expanded ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed,
@@ -184,24 +181,15 @@ export class NavigatorProvider implements vscode.TreeDataProvider<NavigatorItem>
               true
             );
 
-            // Create the children for this folder
-            navItem.children = (folderItem.items || []).map(subItem =>
-              this.createFileItem(
-                subItem.label,
-                subItem.path || '',
-                subItem.type || 'file'
-              )
-            );
+            if ('items' in folderItem) {
+              navItem.children = folderItem.items.map(subItem =>
+                this.createFileItem(subItem.label, subItem.path || '', subItem.type || 'file')
+              );
+            }
 
             return navItem;
           }
-
-          // For non-folder items
-          return this.createFileItem(
-            item.label,
-            item.path || '',
-            item.type || 'file'
-          );
+          return this.createFileItem(item.label, item.path || '', item.type || 'file');
         })
       );
     }
@@ -245,6 +233,13 @@ export class NavigatorProvider implements vscode.TreeDataProvider<NavigatorItem>
         vscode.TreeItemCollapsibleState.None,
         pathOrCmd,
         'command'
+      );
+    } else if (type === 'powershellCommand') {
+      return new NavigatorItem(
+        label,
+        vscode.TreeItemCollapsibleState.None,
+        pathOrCmd,
+        'powershellCommand'
       );
     } else if (type === 'md') {
       const item = new NavigatorItem(
@@ -301,6 +296,8 @@ export class NavigatorProvider implements vscode.TreeDataProvider<NavigatorItem>
       return item;
     }
   }
+
+
 
 
   dispose() { this.configWatcher.dispose(); }

@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import { NavigatorProvider, NavigatorItem, NavigatorConfig, NavigatorCategoryItem } from './navigatorView';
+import * as os from 'os';
 
 export function activate(context: vscode.ExtensionContext) {
     console.log('Extension activating...');
@@ -1612,6 +1613,14 @@ X^2^ (superscript)</div>
 
 
     let itemToMove: NavigatorItem | null = null;
+    function executeTerminalCommand(command: string): void {
+        const terminal = vscode.window.createTerminal('Navigator Command');
+        terminal.show();
+        // Add a small delay to ensure the terminal is ready
+        setTimeout(() => {
+            terminal.sendText(command);
+        }, 500);
+    }
 
     context.subscriptions.push(
         // DRAG AND DROP 
@@ -1656,11 +1665,7 @@ X^2^ (superscript)</div>
                         // Save config
                         fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
 
-                        // Refresh view
-                        navigatorProvider.refresh();
-                        navigatorProvider.loadConfig();
-
-                        navigatorProvider.refresh();
+                        vscode.commands.executeCommand('ocrmnavigator.refresh');
                         vscode.window.showInformationMessage(`Removed "${item.label}" from navigator`);
                         break;
                     }
@@ -1697,9 +1702,7 @@ X^2^ (superscript)</div>
 
                 // Save changes
                 fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
-                navigatorProvider.refresh();
-                navigatorProvider.loadConfig();
-
+                vscode.commands.executeCommand('ocrmnavigator.refresh');
                 vscode.window.showInformationMessage(`Moved "${item.label}" from "${parentCategory.label}"`);
                 itemToMove = null;
             } catch (error) {
@@ -1768,10 +1771,7 @@ X^2^ (superscript)</div>
 
                 // Copy new config
                 fs.copyFileSync(sourcePath, configPath);
-
-                // Reload
-                navigatorProvider.refresh();
-                navigatorProvider.loadConfig();
+                vscode.commands.executeCommand('ocrmnavigator.refresh');
                 vscode.window.showInformationMessage('Config imported successfully!');
             } catch (error) {
                 vscode.window.showErrorMessage(`Import failed: ${error instanceof Error ? error.message : String(error)}`);
@@ -1792,8 +1792,7 @@ X^2^ (superscript)</div>
                 // Set up auto-refresh when saved
                 const disposable = vscode.workspace.onDidSaveTextDocument(savedDoc => {
                     if (savedDoc.uri.fsPath === configPath) {
-                        navigatorProvider.refresh();
-                        navigatorProvider.loadConfig();
+                        vscode.commands.executeCommand('ocrmnavigator.refresh');
                         vscode.window.showInformationMessage('Navigator updated with new config');
                     }
                 });
@@ -1807,17 +1806,12 @@ X^2^ (superscript)</div>
 
         // REFRESH
         vscode.commands.registerCommand('ocrmnavigator.refreshNavigator', () => {
-            navigatorProvider.refresh();
-            navigatorProvider.loadConfig();
-
-            navigatorProvider.refresh();
+            vscode.commands.executeCommand('ocrmnavigator.refresh');
             vscode.window.showInformationMessage('Navigator refreshed');
         }),
         vscode.commands.registerCommand('ocrmnavigator.refresh', () => {
             navigatorProvider.refresh();
             navigatorProvider.loadConfig();
-
-            navigatorProvider.refresh();
         }),
 
 
@@ -1901,9 +1895,7 @@ X^2^ (superscript)</div>
                 // Save updated config
                 fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
 
-                // Refresh the view
-                navigatorProvider.refresh();
-                navigatorProvider.loadConfig();
+                vscode.commands.executeCommand('ocrmnavigator.refresh');
                 vscode.window.showInformationMessage(`Added "${userLabel}" to ${folderSelection.location}`);
             } catch (error) {
                 vscode.window.showErrorMessage(`Failed to add file: ${error instanceof Error ? error.message : String(error)}`);
@@ -1947,9 +1939,7 @@ X^2^ (superscript)</div>
                             // Save config
                             fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
 
-                            // Refresh view
-                            navigatorProvider.refresh();
-                            navigatorProvider.loadConfig();
+                            vscode.commands.executeCommand('ocrmnavigator.refresh');
                             vscode.window.showInformationMessage(`Renamed to "${newLabel}"`);
                         }
 
@@ -1988,30 +1978,29 @@ X^2^ (superscript)</div>
 
                 // Find and remove the item
                 let itemRemoved = false;
+
+                // Loop through categories instead of folders
                 for (const category of config.categories) {
-                    // Use optional chaining and nullish coalescing
-                    const itemIndex = category.items?.findIndex(existingItem => {
-                        // For files, compare full paths
-                        if (item.type === 'file') {
-                            return existingItem.path &&
-                                path.join(workspaceRoot, existingItem.path) === item.filePath;
+                    const itemIndex = category.items.findIndex((existingItem: NavigatorItem) => {
+                        // For files, compare paths and labels for better matching
+                        if (item.type === 'file' || item.type === 'url') {
+                            return existingItem.path === item.path &&
+                                existingItem.label === item.label &&
+                                existingItem.type === item.type;
                         }
-                        // For URLs and commands, compare directly
-                        return existingItem.path === item.filePath ||
-                            existingItem.cmd === item.cmd;
-                    }) ?? -1;  // Default to -1 if items is undefined
+                        // For commands
+                        return existingItem.cmd === item.cmd;
+                    });
 
                     if (itemIndex >= 0) {
-                        // Remove item (using optional chaining again)
-                        category.items?.splice(itemIndex, 1);
+                        // Remove item
+                        category.items.splice(itemIndex, 1);
                         itemRemoved = true;
 
                         // Save config
                         fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
 
-                        // Refresh view
-                        navigatorProvider.refresh();
-                        navigatorProvider.loadConfig();
+                        vscode.commands.executeCommand('ocrmnavigator.refresh');
                         vscode.window.showInformationMessage(`Removed "${item.label}" from navigator`);
                         break;
                     }
@@ -2024,6 +2013,416 @@ X^2^ (superscript)</div>
                 vscode.window.showErrorMessage(
                     `Failed to remove item: ${error instanceof Error ? error.message : String(error)}`
                 );
+            }
+        }),
+        vscode.commands.registerCommand('ocrmnavigator.moveFileUp', async (item: NavigatorItem) => {
+            try {
+                // Load the current configuration
+                const configContent = fs.readFileSync(configPath, 'utf8');
+                const config = JSON.parse(configContent) as NavigatorConfig;
+
+                // Find the item and its parent in configuration
+                const result = findItemInConfig(config, item);
+
+                if (!result) {
+                    vscode.window.showErrorMessage('Cannot find the item in configuration');
+                    return;
+                }
+
+                const { parentCategory, itemIndex, itemsArray } = result;
+
+                // Check if the item is already at the top
+                if (itemIndex === 0) {
+                    vscode.window.showInformationMessage('Item is already at the top');
+                    return;
+                }
+
+                // Swap with the item above it
+                [itemsArray[itemIndex], itemsArray[itemIndex - 1]] =
+                    [itemsArray[itemIndex - 1], itemsArray[itemIndex]];
+
+                // Save updated config
+                fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
+
+                vscode.commands.executeCommand('ocrmnavigator.refresh');
+                vscode.window.showInformationMessage(`Moved "${item.label}" up`);
+            } catch (error) {
+                vscode.window.showErrorMessage(`Failed to move file up: ${error instanceof Error ? error.message : String(error)}`);
+            }
+        }),
+        vscode.commands.registerCommand('ocrmnavigator.moveFileDown', async (item: NavigatorItem) => {
+            try {
+                // Load the current configuration
+                const configContent = fs.readFileSync(configPath, 'utf8');
+                const config = JSON.parse(configContent) as NavigatorConfig;
+
+                // Find the item and its parent in configuration
+                const result = findItemInConfig(config, item);
+
+                if (!result) {
+                    vscode.window.showErrorMessage('Cannot find the item in configuration');
+                    return;
+                }
+
+                const { parentCategory, itemIndex, itemsArray } = result;
+
+                // Check if the item is already at the bottom
+                if (itemIndex === itemsArray.length - 1) {
+                    vscode.window.showInformationMessage('Item is already at the bottom');
+                    return;
+                }
+
+                // Swap with the item below it
+                [itemsArray[itemIndex], itemsArray[itemIndex + 1]] =
+                    [itemsArray[itemIndex + 1], itemsArray[itemIndex]];
+
+                // Save updated config
+                fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
+
+                // Refresh the view
+                vscode.commands.executeCommand('ocrmnavigator.refresh');
+                vscode.window.showInformationMessage(`Moved "${item.label}" down`);
+            } catch (error) {
+                vscode.window.showErrorMessage(`Failed to move file down: ${error instanceof Error ? error.message : String(error)}`);
+            }
+        }),
+        vscode.commands.registerCommand('ocrmnavigator.addFileToSelectedFolder', async (folderItem: NavigatorItem, fileUri?: vscode.Uri) => {
+            try {
+                // Verify we have a folder
+                if (!folderItem || folderItem.type !== 'folder') {
+                    vscode.window.showErrorMessage('Please select a category/folder first');
+                    return;
+                }
+
+                // If no URI was provided, try to get currently active file
+                if (!fileUri) {
+                    const editor = vscode.window.activeTextEditor;
+                    if (editor) {
+                        fileUri = editor.document.uri;
+                    } else {
+                        // If no active editor, prompt user to select a file
+                        const files = await vscode.window.showOpenDialog({
+                            canSelectMany: false,
+                            openLabel: 'Select File',
+                            filters: { 'All Files': ['*'] }
+                        });
+
+                        if (!files || files.length === 0) {
+                            vscode.window.showErrorMessage('No file selected');
+                            return;
+                        }
+
+                        fileUri = files[0];
+                    }
+                }
+
+                // Check if file exists
+                if (!fs.existsSync(fileUri.fsPath)) {
+                    vscode.window.showErrorMessage(`File not found: ${fileUri.fsPath}`);
+                    return;
+                }
+
+                // Calculate relative path from workspace
+                const relativePath = path.relative(workspaceRoot, fileUri.fsPath);
+
+                // Get custom label for the file
+                const fileName = path.basename(fileUri.fsPath);
+                const userLabel = await vscode.window.showInputBox({
+                    prompt: 'Enter a label for this file',
+                    placeHolder: 'e.g. Dashboard Component',
+                    value: fileName
+                });
+
+                if (!userLabel) {
+                    return; // User cancelled
+                }
+
+                // After getting userLabel, ask if this is a file or URL
+                const itemType = await vscode.window.showQuickPick(
+                    ['File', 'URL'],
+                    { placeHolder: 'Is this a file or web URL?' }
+                );
+
+                if (!itemType) return;
+
+                let pathOrUrl: string;
+                if (itemType === 'URL') {
+                    const url = await vscode.window.showInputBox({
+                        prompt: 'Enter the web URL',
+                        placeHolder: 'https://example.com'
+                    });
+                    if (!url) return;
+                    pathOrUrl = url;
+                } else {
+                    pathOrUrl = path.relative(workspaceRoot, fileUri.fsPath);
+                }
+
+                // Read config
+                const configContent = fs.readFileSync(configPath, 'utf8');
+                const config = JSON.parse(configContent) as NavigatorConfig;
+
+                // Find the selected folder in the config
+                const selectedFolderLabel = folderItem.label;
+                let targetCategory: NavigatorCategoryItem | undefined;
+
+                // Look for the folder in categories
+                targetCategory = config.categories.find(category => category.label === selectedFolderLabel);
+
+                if (!targetCategory) {
+                    // Folder wasn't found at the top level, so it might be a subcategory
+                    for (const category of config.categories) {
+                        const subcategory = category.items.find(item =>
+                            item.type === 'folder' && item.label === selectedFolderLabel
+                        ) as NavigatorCategoryItem | undefined;
+
+                        if (subcategory) {
+                            targetCategory = subcategory;
+                            break;
+                        }
+                    }
+                }
+
+                if (!targetCategory) {
+                    vscode.window.showErrorMessage(`Couldn't find the selected folder "${selectedFolderLabel}" in configuration`);
+                    return;
+                }
+
+                // Add the new item to the selected folder
+                targetCategory.items.push({
+                    label: userLabel,
+                    path: pathOrUrl,
+                    type: itemType === 'URL' ? 'url' : 'file',
+                    collapsibleState: vscode.TreeItemCollapsibleState.None,
+                    filePath: pathOrUrl
+                });
+
+                // Save updated config
+                fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
+
+                vscode.commands.executeCommand('ocrmnavigator.refresh');
+                vscode.window.showInformationMessage(`Added "${userLabel}" to "${selectedFolderLabel}"`);
+            } catch (error) {
+                vscode.window.showErrorMessage(`Failed to add file: ${error instanceof Error ? error.message : String(error)}`);
+            }
+        }),
+        vscode.commands.registerCommand('ocrmnavigator.renameBatch', async (uri: vscode.Uri, selectedUris: vscode.Uri[]) => {
+            try {
+                // Handle both single and multi-selection
+                const urisToRename: vscode.Uri[] = selectedUris || (uri ? [uri] : []);
+
+                if (urisToRename.length === 0) {
+                    vscode.window.showErrorMessage('Please select one or more files to rename');
+                    return;
+                }
+
+                // Sort the URIs to ensure consistent order
+                urisToRename.sort((a, b) => a.fsPath.localeCompare(b.fsPath));
+
+                // Get current file names
+                const currentFileNames = urisToRename.map(uri => path.basename(uri.fsPath));
+
+                // Create a temporary file with the current file names
+                const tempDir = os.tmpdir();
+                const tempFilePath = path.join(tempDir, `batch-rename-${Date.now()}.txt`);
+
+                // Write the current file names to the temp file
+                fs.writeFileSync(tempFilePath, currentFileNames.join('\n'), 'utf8');
+
+                // Flag to track if rename has been executed
+                let renameExecuted = false;
+
+                // Function to perform the rename operation
+                const performRename = async () => {
+                    if (renameExecuted) return; // Prevent multiple executions
+                    renameExecuted = true;
+
+                    try {
+                        // Read the current content directly from the file system
+                        // (more reliable than using vscode.workspace.openTextDocument)
+                        const editedContent = fs.readFileSync(tempFilePath, 'utf8');
+                        const newNames = editedContent.split('\n').map(name => name.trim()).filter(name => name !== '');
+
+                        // Validate names
+                        if (newNames.length !== urisToRename.length) {
+                            vscode.window.showErrorMessage(
+                                `Number of names (${newNames.length}) doesn't match number of files (${urisToRename.length})`
+                            );
+                            renameExecuted = false; // Reset flag to allow trying again
+                            return;
+                        }
+
+                        // Rename files
+                        let filesRenamed = 0;
+                        for (let i = 0; i < urisToRename.length; i++) {
+                            const uri = urisToRename[i];
+                            const oldName = path.basename(uri.fsPath);
+                            const newName = newNames[i];
+
+                            if (newName && newName !== oldName) {
+                                const dirName = path.dirname(uri.fsPath);
+                                const newPath = path.join(dirName, newName);
+                                const newUri = vscode.Uri.file(newPath);
+
+                                try {
+                                    await vscode.workspace.fs.rename(uri, newUri, { overwrite: false });
+                                    filesRenamed++;
+                                } catch (err) {
+                                    vscode.window.showErrorMessage(`Failed to rename "${oldName}" to "${newName}": ${err instanceof Error ? err.message : String(err)}`);
+                                }
+                            }
+                        }
+
+                        if (filesRenamed > 0) {
+                            vscode.window.showInformationMessage(`Renamed ${filesRenamed} files`);
+                        } else {
+                            vscode.window.showInformationMessage('No files were renamed');
+                        }
+
+                        // Clean up resources
+                        cleanup();
+                    } catch (error) {
+                        vscode.window.showErrorMessage(
+                            `Failed to process renamed files: ${error instanceof Error ? error.message : String(error)}`
+                        );
+                        renameExecuted = false; // Reset flag to allow trying again
+                    }
+                };
+
+                // Function to clean up resources
+                const cleanup = () => {
+                    // Clean up the temp file
+                    try {
+                        fs.unlinkSync(tempFilePath);
+                    } catch (err) {
+                        console.error('Error deleting temp file:', err);
+                    }
+
+                    // Dispose of all event listeners
+                    textDocumentChangeDisposable.dispose();
+                    closeDisposable.dispose();
+                    applyCommand.dispose();
+                };
+
+                // Register the apply command
+                const applyCommand = vscode.commands.registerCommand('ocrmnavigator.applyBatchRename', performRename);
+
+                // Track the document version to detect changes
+                let lastVersion = -1;
+                let documentSaved = false;
+
+                // Watch for document changes and track when it's saved
+                const textDocumentChangeDisposable = vscode.workspace.onDidChangeTextDocument((event) => {
+                    if (event.document.uri.fsPath === tempFilePath) {
+                        lastVersion = event.document.version;
+                        documentSaved = false;
+                    }
+                });
+
+                // Watch specifically for textDocument save
+                vscode.workspace.onDidSaveTextDocument((document) => {
+                    if (document.uri.fsPath === tempFilePath) {
+                        documentSaved = true;
+                        lastVersion = document.version;
+
+                        // Use a short timeout to ensure the file is fully written
+                        setTimeout(() => {
+                            performRename();
+                        }, 100);
+                    }
+                });
+
+                // Watch for document close
+                const closeDisposable = vscode.workspace.onDidCloseTextDocument((closedDoc) => {
+                    if (closedDoc.uri.fsPath === tempFilePath && documentSaved) {
+                        // Only trigger rename if the document was saved
+                        setTimeout(() => {
+                            performRename();
+                        }, 100);
+                    }
+                });
+
+                // Save all disposables in context subscriptions
+                context.subscriptions.push(applyCommand, textDocumentChangeDisposable, closeDisposable);
+
+                // Open the file in the editor
+                const document = await vscode.workspace.openTextDocument(tempFilePath);
+                await vscode.window.showTextDocument(document);
+
+                // Show message with explicit apply button
+                vscode.window.showInformationMessage(
+                    'Edit the file names, then save/close the file or click "Apply Rename" to complete the process.',
+                    { modal: false },
+                    'Apply Rename'
+                ).then(selection => {
+                    if (selection === 'Apply Rename') {
+                        vscode.commands.executeCommand('ocrmnavigator.applyBatchRename');
+                    }
+                });
+
+            } catch (error) {
+                vscode.window.showErrorMessage(
+                    `Failed to batch rename: ${error instanceof Error ? error.message : String(error)}`
+                );
+            }
+        }),
+        vscode.commands.registerCommand('ocrmnavigator.addFilesToNavigator', async (clickedUri: vscode.Uri, selectedUris: vscode.Uri[]) => {
+            try {
+                // Debug selections
+                console.log('Clicked URI:', clickedUri?.fsPath);
+                console.log('Selected URIs:', selectedUris?.map(u => u.fsPath));
+
+                // Handle both single and multiple selection properly
+                const fileUris = selectedUris?.length > 0 ? selectedUris : clickedUri ? [clickedUri] : [];
+
+                // Fallback to active editor if nothing selected
+                if (fileUris.length === 0) {
+                    const editor = vscode.window.activeTextEditor;
+                    if (editor) {
+                        fileUris.push(editor.document.uri);
+                    } else {
+                        vscode.window.showErrorMessage('No files selected');
+                        return;
+                    }
+                }
+
+                // Load config
+                const configContent = fs.readFileSync(configPath, 'utf8');
+                const config = JSON.parse(configContent) as NavigatorConfig;
+
+                // Select destination folder
+                const folderSelection = await selectFolder(config);
+                if (!folderSelection) return;
+
+                // Process each file
+                let addedCount = 0;
+                for (const fileUri of fileUris) {
+                    if (!fs.existsSync(fileUri.fsPath)) {
+                        vscode.window.showWarningMessage(`Skipping - File not found: ${fileUri.fsPath}`);
+                        continue;
+                    }
+
+                    const fileName = path.basename(fileUri.fsPath);
+                    const label = fileName.replace(/\.[^/.]+$/, "");
+                    const relativePath = path.relative(workspaceRoot, fileUri.fsPath);
+
+                    folderSelection.targetItems.push({
+                        label: label,
+                        path: relativePath,
+                        type: 'file',
+                        collapsibleState: vscode.TreeItemCollapsibleState.None,
+                        filePath: relativePath
+                    });
+
+                    addedCount++;
+                }
+
+                if (addedCount > 0) {
+                    fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
+                    vscode.commands.executeCommand('ocrmnavigator.refresh');
+                    vscode.window.showInformationMessage(`Added ${addedCount} files to ${folderSelection.location}`);
+                }
+            } catch (error) {
+                vscode.window.showErrorMessage(`Failed to add files: ${error instanceof Error ? error.message : String(error)}`);
             }
         }),
 
@@ -2050,10 +2449,7 @@ X^2^ (superscript)</div>
 
                     // Save config
                     fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
-
-                    // Refresh view
-                    navigatorProvider.refresh();
-                    navigatorProvider.loadConfig();
+                    vscode.commands.executeCommand('ocrmnavigator.refresh');
                     vscode.window.showInformationMessage(`Moved "${item.label}" up`);
                 } else {
                     vscode.window.showInformationMessage('Category is already at the top');
@@ -2083,10 +2479,7 @@ X^2^ (superscript)</div>
 
                     // Save config
                     fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
-
-                    // Refresh view
-                    navigatorProvider.refresh();
-                    navigatorProvider.loadConfig();
+                    vscode.commands.executeCommand('ocrmnavigator.refresh');
                     vscode.window.showInformationMessage(`Moved "${item.label}" down`);
                 } else {
                     vscode.window.showInformationMessage('Category is already at the bottom');
@@ -2131,10 +2524,7 @@ X^2^ (superscript)</div>
 
                 // Save config
                 fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
-
-                // Refresh view
-                navigatorProvider.refresh();
-                navigatorProvider.loadConfig();
+                vscode.commands.executeCommand('ocrmnavigator.refresh');
                 vscode.window.showInformationMessage(`Added category "${categoryName}"`);
             } catch (error) {
                 vscode.window.showErrorMessage(`Failed to add category: ${error instanceof Error ? error.message : String(error)}`);
@@ -2179,10 +2569,7 @@ X^2^ (superscript)</div>
 
                 // Save config
                 fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
-
-                // Refresh view
-                navigatorProvider.refresh();
-                navigatorProvider.loadConfig();
+                vscode.commands.executeCommand('ocrmnavigator.refresh');
                 vscode.window.showInformationMessage(`Added subcategory "${subcategoryName}"`);
             } catch (error) {
                 vscode.window.showErrorMessage(
@@ -2224,10 +2611,7 @@ X^2^ (superscript)</div>
 
                     // Save config
                     fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
-
-                    // Refresh view
-                    navigatorProvider.refresh();
-                    navigatorProvider.loadConfig();
+                    vscode.commands.executeCommand('ocrmnavigator.refresh');
                     vscode.window.showInformationMessage(`Renamed category to "${newName}"`);
                 }
             } catch (error) {
@@ -2274,10 +2658,7 @@ X^2^ (superscript)</div>
 
                 // Save config
                 fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
-
-                // Refresh view
-                navigatorProvider.refresh();
-                navigatorProvider.loadConfig();
+                vscode.commands.executeCommand('ocrmnavigator.refresh');
                 vscode.window.showInformationMessage(`Deleted category "${item.label}"`);
             } catch (error) {
                 vscode.window.showErrorMessage(`Failed to delete category: ${error instanceof Error ? error.message : String(error)}`);
@@ -2285,13 +2666,11 @@ X^2^ (superscript)</div>
         }),
         vscode.commands.registerCommand('ocrmnavigator.collapseFolder', (item: NavigatorItem) => {
             updateFolderExpansion(item, false);
-            navigatorProvider.refresh();
-            navigatorProvider.loadConfig();
+            vscode.commands.executeCommand('ocrmnavigator.refresh');
         }),
         vscode.commands.registerCommand('ocrmnavigator.expandFolder', (item: NavigatorItem) => {
             updateFolderExpansion(item, true);
-            navigatorProvider.refresh();
-            navigatorProvider.loadConfig();
+            vscode.commands.executeCommand('ocrmnavigator.refresh');
         }),
 
 
@@ -2341,8 +2720,7 @@ X^2^ (superscript)</div>
 
                 // Save and refresh
                 fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
-                navigatorProvider.refresh();
-                navigatorProvider.loadConfig();
+                vscode.commands.executeCommand('ocrmnavigator.refresh');
                 vscode.window.showInformationMessage(`Added "${label}" to ${folderSelection.location}`);
             } catch (error) {
                 vscode.window.showErrorMessage(`Failed to add URL: ${error instanceof Error ? error.message : String(error)}`);
@@ -2404,8 +2782,7 @@ X^2^ (superscript)</div>
                         fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
 
                         // Refresh view
-                        navigatorProvider.refresh();
-                        navigatorProvider.loadConfig();
+                        vscode.commands.executeCommand('ocrmnavigator.refresh');
                         vscode.window.showInformationMessage('Bookmark updated');
                         urlFound = true;
                         break;
@@ -2482,8 +2859,7 @@ X^2^ (superscript)</div>
                 if (urlRemoved) {
                     // Save updated config
                     fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
-                    navigatorProvider.refresh();
-                    navigatorProvider.loadConfig();
+                    vscode.commands.executeCommand('ocrmnavigator.refresh');
                     vscode.window.showInformationMessage(`✅ Removed URL: ${item.label}`);
                 } else {
                     vscode.window.showErrorMessage('❌ URL not found in config');
@@ -2537,8 +2913,7 @@ X^2^ (superscript)</div>
 
                 // Save and refresh
                 fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
-                navigatorProvider.refresh();
-                navigatorProvider.loadConfig();
+                vscode.commands.executeCommand('ocrmnavigator.refresh');
                 vscode.window.showInformationMessage(
                     `Added command "${label}" to ${folderSelection.location}`
                 );
@@ -2650,8 +3025,7 @@ X^2^ (superscript)</div>
                 if (commandUpdated) {
                     // Save updated config
                     fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
-                    navigatorProvider.refresh();
-                    navigatorProvider.loadConfig();
+                    vscode.commands.executeCommand('ocrmnavigator.refresh');
                     vscode.window.showInformationMessage(`✅ Updated command: ${newLabel}`);
                 } else {
                     vscode.window.showErrorMessage('❌ Command not found in config');
@@ -2732,8 +3106,7 @@ X^2^ (superscript)</div>
                 if (commandRemoved) {
                     // Save updated config
                     fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
-                    navigatorProvider.refresh();
-                    navigatorProvider.loadConfig();
+                    vscode.commands.executeCommand('ocrmnavigator.refresh');
                     vscode.window.showInformationMessage(`✅ Removed command: ${item.label}`);
                 } else {
                     vscode.window.showErrorMessage('❌ Command not found in config');
@@ -2771,6 +3144,87 @@ X^2^ (superscript)</div>
             }
         }),
 
+
+        // TERMINAL COMMANDS
+        vscode.commands.registerCommand('ocrmnavigator.addTerminalCommandToCategory', async (parentItem?: NavigatorItem) => {
+            try {
+                const terminalCommand = await vscode.window.showInputBox({
+                    prompt: 'Enter terminal command',
+                    placeHolder: 'npm install',
+                    validateInput: value => {
+                        if (!value.trim()) return 'Command cannot be empty';
+                        return null;
+                    }
+                });
+
+                if (!terminalCommand) return;
+
+                const label = await vscode.window.showInputBox({
+                    prompt: 'Enter display label',
+                    placeHolder: 'Install Dependencies'
+                });
+
+                if (!label) return;
+
+                // Create / select folder
+                const configContent = fs.readFileSync(configPath, 'utf8');
+                const config = JSON.parse(configContent) as NavigatorConfig;
+                const folderSelection = await selectFolder(config);
+                if (!folderSelection) return;
+
+                // Add the terminal command
+                folderSelection.targetItems.push({
+                    label,
+                    path: terminalCommand,
+                    type: 'powershellCommand', // New type
+                    collapsibleState: vscode.TreeItemCollapsibleState.None,
+                    filePath: ''
+                });
+
+                // Save and refresh
+                fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
+                vscode.commands.executeCommand('ocrmnavigator.refresh');
+                vscode.window.showInformationMessage(
+                    `Added terminal command "${label}" to ${folderSelection.location}`
+                );
+            } catch (error) {
+                vscode.window.showErrorMessage(
+                    `Failed to add terminal command: ${error instanceof Error ? error.message : String(error)}`
+                );
+            }
+        }),
+        vscode.commands.registerCommand('ocrmnavigator.executeItem', (item: NavigatorItem) => {
+            if (!item) return;
+
+            // For debugging
+            vscode.window.showInformationMessage(`path: ${item.path} -- filePath: ${item.filePath} -- cmd: ${item.cmd} -- label: ${item.label}`);
+
+            switch (item.type) {
+                case 'command':
+                    if (item.path) {
+                        vscode.commands.executeCommand(item.path);
+                    } else {
+                        vscode.window.showErrorMessage(`Failed to execute VS Code command: No path specified`);
+                    }
+                    break;
+
+                case 'powershellCommand':
+                    const commandToRun = item.path || item.cmd || item.filePath;
+                    if (commandToRun) {
+                        executeTerminalCommand(commandToRun);
+                    } else {
+                        vscode.window.showErrorMessage(`Failed to execute PowerShell command: No command specified`);
+                    }
+                    break;
+
+                case 'file':
+                    // Your existing code to open files
+                    // ...
+                    break;
+
+                // Other types you may have
+            }
+        }),
 
         // SNIPPETS
         vscode.commands.registerCommand('ocrmnavigator.createSnippet', async (parentItem?: NavigatorItem) => {
@@ -2820,7 +3274,7 @@ X^2^ (superscript)</div>
                 const snippetFileName = `${cleanSnippetName}.snippet.tsx`;
                 const snippetPath = path.join(snippetsDir, snippetFileName);
 
-                // Create default snippet template
+                // Create default snippet template with the first line being the snippet name
                 const defaultSnippetContent = `${cleanSnippetName}`;
 
                 // Create the snippet file
@@ -2838,13 +3292,39 @@ X^2^ (superscript)</div>
                 // Save the updated config
                 fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
 
-                // Refresh the explorer view
+                // Refresh navigator view
                 navigatorProvider.refresh();
-                navigatorProvider.loadConfig();
+
                 // Open the snippet file for editing
                 const document = await vscode.workspace.openTextDocument(snippetPath);
-                await vscode.window.showTextDocument(document);
+                const editor = await vscode.window.showTextDocument(document);
 
+                try {
+                    // Get clipboard content and paste it on the second line if available
+                    const clipboardContent = await vscode.env.clipboard.readText();
+
+                    if (clipboardContent.trim() !== '') {
+                        // Add a new line at position 0,cleanSnippetName.length (end of first line)
+                        // Then insert the clipboard content
+                        await editor.edit(editBuilder => {
+                            // Insert a newline at the end of the first line
+                            editBuilder.insert(
+                                new vscode.Position(0, cleanSnippetName.length),
+                                '\n\n' + clipboardContent
+                            );
+
+                            // Position cursor at start of inserted content
+                            editor.selection = new vscode.Selection(
+                                new vscode.Position(2, 0),
+                                new vscode.Position(2, 0)
+                            );
+                        });
+                    }
+                } catch (clipboardError) {
+                    // Just log the error, don't disrupt the user experience if clipboard access fails
+                    console.error('Failed to access clipboard:', clipboardError);
+                }
+                vscode.commands.executeCommand('ocrmnavigator.refresh');
                 vscode.window.showInformationMessage(`✅ Created snippet: ${snippetName}`);
             } catch (error) {
                 vscode.window.showErrorMessage(
@@ -2891,8 +3371,7 @@ X^2^ (superscript)</div>
 
                     // Save config
                     fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
-                    navigatorProvider.refresh();
-                    navigatorProvider.loadConfig();
+                    vscode.commands.executeCommand('ocrmnavigator.refresh');
                     vscode.window.showInformationMessage(`Deleted snippet "${item.label}"`);
                 } else {
                     vscode.window.showErrorMessage('Snippet not found in config');
@@ -2997,12 +3476,7 @@ X^2^ (superscript)</div>
                             // Save back to original snippets file
                             fs.writeFileSync(snippetsFilePath, JSON.stringify(currentSnippets, null, 2));
 
-                            // Update the tree view if needed
-                            navigatorProvider.refresh();
-                            navigatorProvider.loadConfig();
-
-                            navigatorProvider.refresh();
-
+                            vscode.commands.executeCommand('ocrmnavigator.refresh');
                         } catch (error) {
                             const errorMessage = error instanceof Error ? error.message : String(error);
                             vscode.window.showErrorMessage(`Error updating snippet: ${errorMessage}`);
@@ -3093,10 +3567,7 @@ X^2^ (superscript)</div>
 
                 // Save the updated config
                 fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
-
-                // Refresh the explorer view
-                navigatorProvider.refresh();
-                navigatorProvider.loadConfig();
+                vscode.commands.executeCommand('ocrmnavigator.refresh');
                 // Open the snippet file for editing in the current active editor group
                 const document = await vscode.workspace.openTextDocument(snippetPath);
                 await vscode.window.showTextDocument(document);
@@ -3185,13 +3656,7 @@ X^2^ (superscript)</div>
 
                 // Save the updated config
                 fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
-
-                // Refresh the explorer view
-                navigatorProvider.refresh();
-                navigatorProvider.loadConfig();
-
-                navigatorProvider.refresh();
-
+                vscode.commands.executeCommand('ocrmnavigator.refresh');
                 // Open the snippet file for editing in the current active editor group
                 const document = await vscode.workspace.openTextDocument(snippetPath);
                 await vscode.window.showTextDocument(document);
@@ -3230,7 +3695,7 @@ X^2^ (superscript)</div>
                 vscode.window.showErrorMessage('Please select a Markdown file to edit');
                 return;
             }
-        
+
             try {
                 // Get the new label from user input
                 const newLabel = await vscode.window.showInputBox({
@@ -3243,13 +3708,13 @@ X^2^ (superscript)</div>
                         return null;
                     }
                 });
-        
+
                 if (!newLabel) return; // User cancelled
-        
+
                 // Load config
                 const configContent = fs.readFileSync(configPath, 'utf8');
                 const config = JSON.parse(configContent) as NavigatorConfig;
-        
+
                 // Find and update the MD file in config
                 let itemUpdated = false;
                 for (const category of config.categories) {
@@ -3262,7 +3727,7 @@ X^2^ (superscript)</div>
                     }
                     if (itemUpdated) break;
                 }
-        
+
                 if (itemUpdated) {
                     // Save changes
                     fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
@@ -3282,35 +3747,35 @@ X^2^ (superscript)</div>
                 vscode.window.showErrorMessage('Please select a Markdown file to remove');
                 return;
             }
-        
+
             try {
                 // Confirm deletion
                 const confirm = await vscode.window.showQuickPick(['Yes', 'No'], {
                     placeHolder: `Are you sure you want to remove "${parentItem.label}"?`
                 });
-        
+
                 if (confirm !== 'Yes') return;
-        
+
                 // Load config
                 const configContent = fs.readFileSync(configPath, 'utf8');
                 const config = JSON.parse(configContent) as NavigatorConfig;
-        
+
                 // Find and remove the MD file
                 let itemRemoved = false;
                 for (const category of config.categories) {
                     const initialLength = category.items?.length || 0;
-                    
+
                     // Filter out the matching MD file
-                    category.items = category.items?.filter(item => 
-                        !(item.type === 'md' && 
-                          (item.path === parentItem.filePath || item.path === parentItem.path))
-                          || []);
-                    
+                    category.items = category.items?.filter(item =>
+                        !(item.type === 'md' &&
+                            (item.path === parentItem.filePath || item.path === parentItem.path))
+                        || []);
+
                     if (category.items.length < initialLength) {
                         itemRemoved = true;
                     }
                 }
-        
+
                 if (itemRemoved) {
                     // Save changes
                     fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
@@ -3332,28 +3797,28 @@ X^2^ (superscript)</div>
                     vscode.window.showErrorMessage('Please select a Markdown file to edit');
                     return;
                 }
-        
+
                 // Get full path to the MD file
                 const mdPath = path.join(workspaceRoot, parentItem.filePath);
-                
+
                 // Verify file exists
                 if (!fs.existsSync(mdPath)) {
                     vscode.window.showErrorMessage(`Markdown file not found: ${mdPath}`);
                     return;
                 }
-        
+
                 // Open the file in editor (first pane)
                 const document = await vscode.workspace.openTextDocument(mdPath);
                 await vscode.window.showTextDocument(document, {
                     viewColumn: vscode.ViewColumn.One,
                     preview: false
                 });
-        
+
                 // Open preview in second pane
                 await vscode.commands.executeCommand('markdown.showPreviewToSide');
-        
+
                 vscode.window.showInformationMessage(`Editing ${path.basename(mdPath)}`);
-        
+
             } catch (error) {
                 vscode.window.showErrorMessage(
                     `Failed to edit Markdown file: ${error instanceof Error ? error.message : String(error)}`
@@ -3413,10 +3878,7 @@ X^2^ (superscript)</div>
 
             if (updateFolder(config.categories)) {
                 fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
-                navigatorProvider.refresh();
-                navigatorProvider.loadConfig();
-
-                navigatorProvider.refresh();
+                vscode.commands.executeCommand('ocrmnavigator.refresh');
                 const action = expanded ? 'expanded' : 'collapsed';
                 vscode.window.showInformationMessage(`Folder "${item.label}" ${action}`);
             } else {
@@ -3553,6 +4015,17 @@ X^2^ (superscript)</div>
     };
     // Function to generate the HTML content for our webview
     function getCommandsWebviewContent() {
+        const iadded = [
+            ["foldLevel1", "editor.foldLevel1"],
+            ["foldLevel2", "editor.foldLevel2"],
+            ["foldLevel3", "editor.foldLevel3"],
+            ["foldLevel4", "editor.foldLevel4"],
+            ["foldLevel5", "editor.foldLevel5"],
+            ["foldLevel6", "editor.foldLevel6"],
+            ["foldLevel7", "editor.foldLevel7"],
+            ["unfoldAll", "editor.unfoldAll"],
+
+        ]
         // Define our commands array
         const commandArray = [
             ["ShortcutMenuBar.save", "workbench.action.files.save"],
@@ -3886,6 +4359,7 @@ X^2^ (superscript)</div>
 
         // Combine all categories
         const allCommands = [
+            ...iadded,
             ...commandArray,
             ...fileCommands,
             ...editCommands,
@@ -3905,6 +4379,7 @@ X^2^ (superscript)</div>
 
         // Define category mapping for the dropdown
         const categories = [
+            { id: 'other', name: 'Other Commands', commands: commandArray },
             { id: 'custom', name: 'Generic Commands', commands: commandArray },
             { id: 'all', name: 'All Commands', commands: allCommands },
             { id: 'file', name: 'File Commands', commands: fileCommands },
@@ -4189,7 +4664,98 @@ X^2^ (superscript)</div>
       </html>
     `;
     }
+    // Helper function to find an item in the configuration
+    function findItemInConfig(config: NavigatorConfig, item: NavigatorItem): {
+        parentCategory: NavigatorCategoryItem | null,
+        itemIndex: number,
+        itemsArray: any[]
+    } | null {
+        // Search through all categories and their nested items
+        for (const category of config.categories) {
+            // Check if the item is directly in this category
+            const categoryItemIndex = category.items.findIndex(fileItem =>
+                fileItem.label === item.label &&
+                (fileItem.path === item.filePath || fileItem.filePath === item.filePath)
+            );
 
+            if (categoryItemIndex !== -1) {
+                return {
+                    parentCategory: category,
+                    itemIndex: categoryItemIndex,
+                    itemsArray: category.items
+                };
+            }
+
+            // Search through the category's subfolders
+            for (let i = 0; i < category.items.length; i++) {
+                const subItem = category.items[i];
+
+                if (subItem.type === 'folder' && 'items' in subItem) {
+                    const folderItem = subItem as NavigatorCategoryItem;
+
+                    // Search in this folder's items
+                    const subIndex = folderItem.items.findIndex(fileItem =>
+                        fileItem.label === item.label &&
+                        (fileItem.path === item.filePath || fileItem.filePath === item.filePath)
+                    );
+
+                    if (subIndex !== -1) {
+                        return {
+                            parentCategory: folderItem,
+                            itemIndex: subIndex,
+                            itemsArray: folderItem.items
+                        };
+                    }
+
+                    // Recursively search deeper (for nested folders)
+                    const deepResult = searchNestedFolder(folderItem, item);
+                    if (deepResult) {
+                        return deepResult;
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    // Helper function to recursively search through nested folders
+    function searchNestedFolder(folder: NavigatorCategoryItem, item: NavigatorItem): {
+        parentCategory: NavigatorCategoryItem,
+        itemIndex: number,
+        itemsArray: any[]
+    } | null {
+        if (!folder.items) {
+            return null;
+        }
+
+        // Search for the item in this folder's items
+        const itemIndex = folder.items.findIndex(fileItem =>
+            fileItem.label === item.label &&
+            (fileItem.path === item.filePath || fileItem.filePath === item.filePath)
+        );
+
+        if (itemIndex !== -1) {
+            return {
+                parentCategory: folder,
+                itemIndex: itemIndex,
+                itemsArray: folder.items
+            };
+        }
+
+        // Search through any nested folders
+        for (const subItem of folder.items) {
+            if (subItem.type === 'folder' && 'items' in subItem) {
+                const nestedFolder = subItem as NavigatorCategoryItem;
+                const result = searchNestedFolder(nestedFolder, item);
+                if (result) {
+                    return result;
+                }
+            }
+        }
+
+        return null;
+    }
     // In your extension activation
     const actionBtn = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right);
     actionBtn.text = '$(list-flat) Actions';
@@ -4220,6 +4786,9 @@ X^2^ (superscript)</div>
             vscode.commands.executeCommand(selected.command);
         }
     }))
+
+
+
 
 
     view.title = "F/F Navigator";

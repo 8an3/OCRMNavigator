@@ -3,15 +3,24 @@
 [![Version](https://img.shields.io/badge/version-1.0.2-blue)](https://marketplace.visualstudio.com/items?itemName=skyler.ocrmnavigator)
 [![License](https://img.shields.io/badge/license-MIT-green)](https://github.com/8an3/OCRMNavigator/blob/main/LICENSE)
 
-A VS Code extension for bookmarking files, URLs, commands, snippets ( along with creating and editing them, unlike any other ), bookmark and create .md file, to-do lists, docs, and more. 
+Basically, whatever you can think of, can be pinned in the pane. Replace a dozen or so extensions, while doing a better in the process. 
+Quick overview:
 
-All in one navigation pane... instead of 6-7 extensions spread accross vscodes entire interface or configs buried somewhere in the 1000s of lines of preferences, or even in some config file thrown, god only knows, how many folders deep into your files system. 
+1. Bookmark files, urls, VS Code commands, powershell commands, md files, snippets, to do lists, and on and on.
+2. Extremely easy to use interface, you dont need the docs. Just right click it.
+3. VS Code command reference sheet larger, than anywhere else I could find. In the market place or online.
+4. Modern md editor, never leaving the editor. Create a file, with a renderer, or if you want even a third editor with a md reference sheet.
+5. Rename batches of files at once.
+6. Modern snippet editor, and obviously organizer. Create in a tsx file, edit in a tsx file. No weird uis that dont well.
+7. With user experience in mind first, its extremely intuitive to do, just about anything. Some things still need to be tighten up but that never ends. Obviously there will be things that are not so easy to notice. ie: cant implement drag and drop, but was able to come up with a quick work around that takes twice the clicks but since your not actually dragging the item, theres no chance in dropping it before bringing it to your destination.
 
-All the while these same extensions bug and / or crash out all the time, always seems to happen when you need to use it, not the hours long coding session before. 
+## [TOC]
 
-Creating, editing and so on, all done in one navigation pane. No more preference/config digging or searching.
-
-Turning a rather un-user-friendly experience, into something a lot better and giving you easier access to whatever is you need as you need it. 
+I. [Example](#example)
+II. [Usage](#usage)
+III. [Development](#development)
+IV. [Contributing](#contributing)
+V. [Roadmap](#roadmap)
 
 ### Bookmark types and other features
 
@@ -28,29 +37,28 @@ Turning a rather un-user-friendly experience, into something a lot better and gi
    3. Reorder categories (move up/down)
    4. Delete categories when no longer needed
    5. Sub folders for even more organization
-3. URLs -Instead of opening a browser and rummaging through your bookmarks, its your in your nav panel.
-4. Commands
+3. URLs 
+   1. Instead of opening a browser and rummaging through your bookmarks, its your in your nav panel.
+4. VSCode Commands
    1. No limits on how many you can have, you can create as many directories / sub-directories of commands you need or ever want.
    2.  Just a click away.
    3.  Command refernce sheet for those who need it. Didn't add commands as a default, since theres like 150-200 or even more maybe.
    4.  You can search, or view by category.
    5.  I don't know why every extension seems to want to limit you on the amount of extensions you have quick access to. From a quick count you can fit about 43 without scrolling, if you need that many who knows. But with scrolling, you can have all the commands, lol.
-5. Snippets
+5. Powershell Commands
+   1.  Same as above
+6. Snippets
    1.  Saved in your .vscode just like any other snippets editor on here, but with a bit of a savage, but cherry on top touch.
    2.  Instead of editing and creating with the god awful .vscode format. You create the snippet in a blank .tsx file with your snippet name on the top line.
    3.  You ALSO edit your snippets in a .tsx file, with your snippet name on the top line.
    4.  Your prefix gets created by converting your snippet name to all lower case letters and spaces turning into dashes ( - ). Thus giving you access to your snippets on the fly, just like any other ( Toggle State is then toggle-state as your prefix ).
    5.  No more wasting time with double quotes, or trying to make it look good by lining everything up... just save and fucking code dudes.
-6. .md files
+   6.  I know theres a work around, but still feels so clunky to us, in a tsx file, then in the snippets, then going back and click on the snippets file again to re render the snippets file and on and on. Where as with this one, you input the name, where you want to store it in the extension and if you already have the snippet in your clipboard it automatically pastes at file creation. Save, then move on to creating the next one. I find its not just the big things that can really waste your time. The small things you dont even notice or count towards wasting your time, but suck so much time out of your day... mainly due to dumb design decisions or the decision NOT to go back to improve it. Thats... basically the whole reason I HAD to start coding.
+7. .md files
    1.  Comprehensive cheat sheet you can access any time without leaving vs code.
    2.  Create a md file, that opens a md renderer along side it.
    3.  If you so choose and depends who wide your monitor is, can create an md file with the cheat sheet and renderer open all at once, with one click. Not gonna lie, the little touches with this extension make it nice to have.
-7. Quick Access
-   1. Bookmarking pre-made frequently used components and functions
-   2. All commands available via right-click context menu
-   3. Visual tree view in Explorer pane
-   4. Vscode commands reference from the dropdown
-8. Drag and Drop 
+8.  Drag and Drop 
    1. Theres no way to actually implement drag and drop as far as I can tell in vscode, but was able to incorporate the next best thing to help quickly move things around without having to dig out the config file.
    2.  With saying that, your more than welcome to do that too.
 9.  Config file
@@ -60,64 +68,317 @@ Turning a rather un-user-friendly experience, into something a lot better and gi
 10. Reveal in explorer
 11. Copy path
 12. All the while, its pretty quick. Considering some extensions just seem to bog vscode down.
-13. Along with whatever else you can think of...
+13. Batch rename
+    1.  Select file/s in the vscode explorer
+    2.  Opens a .txt file with the names in a single column
+    3.  Mass edit file names and/or extensions
+    4.  Save and filenames will be updated
+    5.  Note: currently only saves when you click the save button that appears in the toast, working on getting save on close and on save close file
+14. Along with whatever else you can think of... 
 
-Full but shortened example: 
+> [!NOTE]
+> If you see any commands missing from the list, hit me up. That goes for the same markdown styling. Ive noticed not all styling formats work on github, Im not experienced enough with md to know the reasons behind that. For now, Ill only include ones that work on github, but send them to me anyways as I may change my mind. Include a note at the bottom, stating where it works or something. Feature suggestions are welcome as well, whether that be on new features or improving current ones.  
+> 
 
-- COMMANDS
-    - Save All
-    - Format
-    - Other CMDS ( Sub Folder )
 
-- FILES
-    - Admin Dash
-    - Client Dash
-    - Dev Dash
+## Example
+
+<details closed>
+<summary>Full but shortend example... </summary>
+
+```json
+{
+  "categories": [
+    {
+      "label": "CMDS",
+      "expanded": false,
+      "type": "folder",
+      "items": [
+        {
+          "label": "Save All",
+          "path": "workbench.action.files.saveAll",
+          "type": "command"
+        },
+        {
+          "label": "Format",
+          "path": "editor.action.formatDocument",
+          "type": "command"
+        },
+        {
+          "label": "Fold 1",
+          "path": "editor.foldLevel1",
+          "type": "command"
+        },
+        {
+          "label": "Fold 2",
+          "path": "editor.foldLevel2",
+          "type": "command"
+        },
+        {
+          "label": "Fold 3",
+          "path": "editor.foldLevel3",
+          "type": "command"
+        },
+        {
+          "label": "Fold 4",
+          "path": "editor.foldLevel4",
+          "type": "command"
+        },
+        {
+          "label": "Fold 5",
+          "path": "editor.foldLevel5",
+          "type": "command"
+        },
+        {
+          "label": "Unfold",
+          "path": "editor.unfold",
+          "type": "command"
+        },
+        {
+          "label": "Other CMDS",
+          "type": "folder",
+          "expanded": false,
+          "items": [],
+          "filePath": ""
+        }
+      ]
+    },
+    {
+      "label": "PRIMARY",
+      "expanded": true,
+      "type": "folder",
+      "items": [
+        {
+          "label": "Admin Dashboard",
+          "path": "admin/dashboard.tsx",
+          "type": "file"
+        },
+        {
+          "label": "Client Dashboard",
+          "path": "client/dashboard.tsx",
+          "type": "file"
+        },
+        {
+          "label": "Dev Dashboard",
+          "path": "/dev/dashboard.tsx",
+          "type": "file"
+        }
+      ]
+    },
+    {
+      "label": "SECONDARY",
+      "expanded": false,
+      "type": "folder",
+      "items": [
+        {
+          "label": "client website",
+          "path": "/dealer/client/home.tsx",
+          "type": "file"
+        },
+        {
+          "label": "unit.file",
+          "path": "/unit/$file.tsx",
+          "type": "file"
+        }
+      ]
+    },
+    {
+      "label": "COMPONENTS",
+      "expanded": false,
+      "type": "folder",
+      "items": [
+        {
+          "label": "app.sidebar",
+          "path": "/appSidebar.tsx",
+          "type": "file"
+        },
+        {
+          "label": "components.shared",
+          "path": "/shared/shared.tsx",
+          "type": "file"
+        },
+        {
+          "label": "unit.file",
+          "path": "/client/FILE.tsx",
+          "type": "file"
+        }
+      ]
+    },
+    {
+      "label": "UTILS",
+      "expanded": false,
+      "type": "folder",
+      "items": [
+        {
+          "label": "app.env",
+          "path": ".env",
+          "type": "file"
+        },
+        {
+          "label": "app.packageJSON",
+          "path": "package.json",
+          "type": "file"
+        },
+        {
+          "label": "app.schemaPrisma",
+          "path": "/prisma/schema.prisma",
+          "type": "file"
+        },
+        {
+          "label": "app.seed",
+          "path": "/prisma/seed.ts",
+          "type": "file"
+        }
+      ]
+    },
+    {
+      "label": "shadCN",
+      "expanded": false,
+      "type": "folder",
+      "items": [
+        {
+          "label": "Dialog",
+          "path": "components/shad/dialog.tsx",
+          "type": "file"
+        },
+      ]
+    },
+    {
+      "label": "WEB",
+      "expanded": true,
+      "type": "folder",
+      "items": [
+        {
+          "label": "localhost sales dash",
+          "path": "http://localhost:3000/portal/sales/dashboard/clients",
+          "type": "url"
+        },
+        {
+          "label": "Playlist",
+          "path": "https://www.youtube.com",
+          "type": "url"
+        },
+        {
+          "label": "Mixes",
+          "path": "https://www.youtube.com",
+          "type": "url"
+        },
+        {
+          "label": "github repo",
+          "path": "https://github.com/8an3/OpinionatedDealerCRM",
+          "type": "url"
+        },
+        {
+          "label": "radix",
+          "path": "https://www.radix-ui.com",
+          "type": "url"
+        },
+        {
+          "label": "vercel",
+          "path": "https://vercel.com/",
+          "type": "url"
+        },
+        {
+          "label": "lucide",
+          "path": "https://lucide.dev/icons/",
+          "type": "url"
+        },
+      ]
+    },
+    {
+      "label": "SNIPPETS",
+      "type": "folder",
+      "expanded": true,
+      "items": [
+        {
+          "label": "toggle state",
+          "path": ".vscode/ocrmnavigator.code-snippets",
+          "type": "snippet",
+          "collapsibleState": 0,
+          "filePath": "toggle-state"
+
+        },
+        {
+          "label": "user auth",
+          "path": ".vscode/ocrmnavigator.code-snippets",
+          "type": "snippet",
+          "collapsibleState": 0,
+          "filePath": "user-auth"
+
+        }
+      ],
+      "collapsibleState": 1,
+      "filePath": ""
+    },
+    {
+      "label": "App Ideas",
+      "type": "folder",
+      "expanded": true,
+      "items": [
+        {
+          "label": "appIdeas.lawyerApp",
+          "path": "code\\notes\\appIdeas.lawyerApp.md",
+          "type": "file",
+          "collapsibleState": 0,
+          "filePath": "code\\notes\\appIdeas.lawyerApp.md"
+        }
+      ],
+      "collapsibleState": 1,
+      "filePath": ""
+    },
+    {
+      "label": "Dev Map",
+      "type": "folder",
+      "expanded": true,
+      "items": [],
+      "collapsibleState": 1,
+      "filePath": ""
+    },
+     {
+      "label": "TO-DO",
+      "type": "folder",
+      "expanded": true,
+      "items": [],
+      "collapsibleState": 1,
+      "filePath": ""
+    },
+     {
+      "label": "DOCS",
+      "type": "folder",
+      "expanded": true,
+      "items": [],
+      "collapsibleState": 1,
+      "filePath": ""
+    } 
+  ]
+}
+```
+
+</details>
+
+
+
+
+>Along with some others but you get the idea... Never used to, but using 2 nav panes on either side feels good with this extension. As your commands are never too far to use, or too many clicks away.
   
-- RELATED FILES
-    - Client Facing Website
-    - Unit File 
-
-- COMPONENTS
-    - App sidebar
-    - Shared Components 
-
-- FILES
-    - Client Facing Website
-    - Unit File 
-
-- WEB
-   - site link
-   - site link
-
-- SNIPPETS
-   - User Auth
-   - Toggle State
-
-- TO DO
-   - PRIORITY
-   - BACKBURNER
-
-- DEV MAP
-   - .md file
-   - .md file
-
-- Along with some others but you get the idea... Never used to, but using 2 nav panes on either side feels good with this extension. As your commands are never too far to use, or too many clicks away.
-  
-### Usage
+## Usage
 
 ##### FILES
 
 | Command | Description | Shortcut |
 |---------|-------------|----------|
 | `Add to CRM Navigator` | Add current file to navigation | Right-click item |
+| `Batch Add to CRM Navigator` | Select as many files as you want, the label/name of the file will be taken from the file name without the extension. You pick where you want them by selecting a folder, and all selected files will be saved. | Right-click item |
 | `Edit Label` | Change displayed name for file | Right-click item |
 | `Moving Files` | Move files to another folder. Theres no drag and drop avaialble, so this is the next best thing. |  In extension pane, right click, select move item. Right click on the destination folder, select as move destination.|
 | `Remove File` | Delete item from navigation | Right-click item |
 | `Copy Path` | Copy full file path to clipboard | Right-click item |
 | `Reveal in Explorer` | Show file in system file explorer | Available by inline and right-click item. |
 
-- ***Note*** Extensions filing system is virtual so the above will not actually be moved anywhere.
+
+> [!NOTE]
+> Extensions filing system is virtual so the above will not actually be moved anywhere.
+> 
 
 ##### .MD
 
@@ -130,7 +391,9 @@ Full but shortened example:
 | `Remove md` | Delete item from navigation | Right-click item |
 | `Show md Cheat Sheet` | Comprehensive cheat sheet | Dropdown menu |
 
-- ***Note*** When adding md files, they will be added in a folder in your .vscode for storage, but can be organized any way you want in the extension. This keeps your root directory looking clean, while giving you the organization you need. While at the same time you can retrieve those files painless at anytime.
+> [!NOTE]
+> When adding md files, they will be added in a folder in your .vscode for storage, but can be organized any way you want in the extension. This keeps your root directory looking clean, while giving you the organization you need. While at the same time you can retrieve those files painless at anytime.
+> 
 
 ##### SNIPPETS
 
@@ -148,7 +411,9 @@ Full but shortened example:
 | `Add Sub-Folder` | Add sub-folders to nav directory | Right-click item |
 | `Expand / Collapse Sub/Folder` | Set default value for folder | Right-click item|
 
-- ***Note*** Same as files above. Folders only go 2 deep. Didn't see the point of going further than that kinda defeats the purpose of this. With the thought in mind, first level are most used items you need, while the collapsed folders are the second most used, and the subfolder being the third. Each folder and be set to open expanded or collapsed as default.
+> [!NOTE]
+> Same as files above. Folders only go 2 deep. Didn't see the point of going further than that kinda defeats the purpose of this. With the thought in mind, first level are most used items you need, while the collapsed folders are the second most used, and the subfolder being the third. Each folder and be set to open expanded or collapsed as default.
+> 
 
 ##### URLS
 
@@ -182,7 +447,29 @@ Full but shortened example:
 | `Refresh Navigator` | Refreshes the pane, loading directly from the config file | Right-click item |
 | `Collapse All` | Collapses all folders | Right-click item |
 
-- ***Note*** Adding any type of item can also be done by right click the same type in the nav pane. Right clicking on files also allows you to open their corresponding cheat sheet.
+##### FUNCTION OUTSIDE PANE
+
+| Command | Description | Shortcut |
+|---------|-------------|----------|
+| `Batch Rename` | Select file/s in the vscode explorer pane and open a .txt file to mass edit file names and/or extensions | right-click item. |
+
+> [!NOTE]
+> Adding any type of item can also be done by right click the same type in the nav pane. Right clicking on files also allows you to open their corresponding cheat sheet.
+> 
+
+
+## Roadmap
+
+<details closed>
+<summary>Details...</summary>
+
+1. Need to include more markdown examples. ie, accordian ( check other readmes for others)
+2. SEARCH bar at the top for even quickr access or search for soemthing you know is there but dont remember where alot
+3. along with pre fix, right click snippet file to copy snippet body, if you were search down the list withg your mouse you might as well just coipy the contents there instead of opening and all that
+4. rename snippet
+
+</details>
+
 
 ### Development
 
@@ -224,12 +511,14 @@ Open a Pull Request
 ###### Found an issue? Have a feature request?
 
 Open an Issue
+
+Rant //
 Dont waste my time creating something so complicated it takes half my day to learn it, for a tool that didnt even need to be that way. Only to find out it sucks, not only just to use ( from a user experience aspect ) but also crashes out everytime I'm about to use it. On the other end of the spectrum stop building tools that are just horrible. Just because you dont know how to do something, doesnt mean you cant learn. I didnt know how to do code anything in this extension when I started. Started with one goal in mind, a quick access file explorer. That obviously went down the rabbit hole. Wanting to fix every app I use, and hated using ( almost all of them, I'll get to the others later ). It's going to feel good deleting them, never to see them again. Also to whoever designed the snippets format, what the fuck were you smoking that day bud? Sorry, but geeze... we can tell it only took you a day to wrap up and ship it and went, 'fuck it... YEET!!'. Meanwhile, we are apparently forever stuck with this format. But hey atleast I figured out a workaround, that no other dev has thought of. Surprising, since this is my first year coding.
 
 Anyways... 
 Atleast have some pride in your work. For example, this will receive updates and changes as time goes on since I don't see myself coding without these features. There will also be more features added down the road.
 
-### Enjoy organized navigation! 🚀
+### Keep your stick on the ice! 🚀
 
 Skyler
 
