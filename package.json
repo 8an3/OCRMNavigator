@@ -3,7 +3,7 @@
   "name": "ocrmnavigator",
   "displayName": "OCRMNavigator",
   "description": "",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "repository": {
     "type": "git",
     "url": "git@github.com:8an3/OCRMNavigator.git"
@@ -16,8 +16,8 @@
   "activationEvents": [
     "onCommand:ocrmnavigator.showNavigator",
     "onCommand:ocrmnavigator.refreshNavigator",
-    "onCommand:ocrmnavigator.editConfig", 
-     "onCommand:ocrmnavigator.renameBatch",
+    "onCommand:ocrmnavigator.editConfig",
+    "onCommand:ocrmnavigator.renameBatch",
     "onView:ocrmnavigatorNavigator"
   ],
   "main": "./out/extension.js",
@@ -241,8 +241,7 @@
         "command": "ocrmnavigator.executeItem",
         "title": "Execute Terminal CMDS",
         "category": "OCRM Navigator"
-      }
-      ,
+      },
       {
         "command": "ocrmnavigator.addFilesToNavigator",
         "title": "Batch Add to CRM Navigator",
@@ -446,22 +445,22 @@
           "command": "ocrmnavigator.viewMarkdownGuide",
           "when": "view == ocrmnavigatorNavigator && viewItem == md",
           "group": "10_md@1"
-        } ,
+        },
         {
           "command": "ocrmnavigator.createMDWCheat",
           "when": "view == ocrmnavigatorNavigator && viewItem == md",
           "group": "10_md@1"
-        } ,
+        },
         {
           "command": "ocrmnavigator.createMD",
           "when": "view == ocrmnavigatorNavigator && viewItem == md",
           "group": "10_md@1"
-        } ,
+        },
         {
           "command": "ocrmnavigator.editMD",
           "when": "view == ocrmnavigatorNavigator && viewItem == md",
           "group": "10_md@1"
-        }  ,
+        },
         {
           "command": "ocrmnavigator.editMDLabel",
           "when": "view == ocrmnavigatorNavigator && viewItem == md",
@@ -479,7 +478,6 @@
           "when": "resourceFilename",
           "group": "navigation"
         },
-        
         {
           "command": "ocrmnavigator.addFilesToNavigator",
           "when": "resourceFilename",
@@ -491,79 +489,79 @@
           "group": "navigation"
         }
       ],
-     "view/title": [
-    {
-        "command": "ocrmnavigator.addCategory",
-        "when": "view == ocrmnavigatorNavigator",
-        "group": "navigation@10",  
-        "icon": "$(add)"
-    },
-    {
-        "command": "ocrmnavigator.addUrlToNavigator",
-        "when": "view == ocrmnavigatorNavigator",
-        "group": "navigation@10",
-        "icon": "$(link)"
-    },
-    {
-        "command": "ocrmnavigator.addCommandToCategory",
-        "when": "view == ocrmnavigatorNavigator",
-        "group": "navigation@10",
-        "icon": "$(terminal)"
-    },
-    {
-        "command": "ocrmnavigator.createSnippet",
-        "when": "view == ocrmnavigatorNavigator",
-        "group": "navigation@11"
-    },
-    {
-        "command": "ocrmnavigator.createMD",
-        "when": "view == ocrmnavigatorNavigator",
-        "group": "navigation@11"
-    },
-    {
-        "command": "ocrmnavigator.createMDWCheat",
-        "when": "view == ocrmnavigatorNavigator",
-        "group": "navigation@11"
-    },
-    {
-      "command": "ocrmnavigator.addTerminalCommandToCategory",
-      "when": "view == ocrmnavigatorNavigator",
-       "group": "navigation@11"
-    },
-    {
-        "command": "ocrmnavigator.exportConfig",
-        "title": "Export Config",
-        "when": "view == ocrmnavigatorNavigator",
-        "group": "navigation@12"
-    },
-    {
-        "command": "ocrmnavigator.importConfig",
-        "title": "Import Config",
-        "when": "view == ocrmnavigatorNavigator",
-        "group": "navigation@12"
-    },
-    {
-        "command": "ocrmnavigator.editConfig",
-        "title": "Edit Config",
-        "when": "view == ocrmnavigatorNavigator",
-        "group": "navigation@12"
-    },
-    {
-        "command": "ocrmnavigator.refresh",
-        "when": "view == ocrmnavigatorNavigator",
-        "group": "navigation@13"
-    },
-    {
-        "command": "ocrmnavigator.showCommandsReference",
-        "when": "view == ocrmnavigatorNavigator",
-        "group": "navigation@14"
-    },
-    {
-        "command": "ocrmnavigator.viewMarkdownGuide",
-        "when": "view == ocrmnavigatorNavigator",
-        "group": "navigation@14"
-    }
-]
+      "view/title": [
+        {
+          "command": "ocrmnavigator.addCategory",
+          "when": "view == ocrmnavigatorNavigator",
+          "group": "navigation@10",
+          "icon": "$(add)"
+        },
+        {
+          "command": "ocrmnavigator.addUrlToNavigator",
+          "when": "view == ocrmnavigatorNavigator",
+          "group": "navigation@10",
+          "icon": "$(link)"
+        },
+        {
+          "command": "ocrmnavigator.addCommandToCategory",
+          "when": "view == ocrmnavigatorNavigator",
+          "group": "navigation@10",
+          "icon": "$(terminal)"
+        },
+        {
+          "command": "ocrmnavigator.createSnippet",
+          "when": "view == ocrmnavigatorNavigator",
+          "group": "navigation@11"
+        },
+        {
+          "command": "ocrmnavigator.createMD",
+          "when": "view == ocrmnavigatorNavigator",
+          "group": "navigation@11"
+        },
+        {
+          "command": "ocrmnavigator.createMDWCheat",
+          "when": "view == ocrmnavigatorNavigator",
+          "group": "navigation@11"
+        },
+        {
+          "command": "ocrmnavigator.addTerminalCommandToCategory",
+          "when": "view == ocrmnavigatorNavigator",
+          "group": "navigation@11"
+        },
+        {
+          "command": "ocrmnavigator.exportConfig",
+          "title": "Export Config",
+          "when": "view == ocrmnavigatorNavigator",
+          "group": "navigation@12"
+        },
+        {
+          "command": "ocrmnavigator.importConfig",
+          "title": "Import Config",
+          "when": "view == ocrmnavigatorNavigator",
+          "group": "navigation@12"
+        },
+        {
+          "command": "ocrmnavigator.editConfig",
+          "title": "Edit Config",
+          "when": "view == ocrmnavigatorNavigator",
+          "group": "navigation@12"
+        },
+        {
+          "command": "ocrmnavigator.refresh",
+          "when": "view == ocrmnavigatorNavigator",
+          "group": "navigation@13"
+        },
+        {
+          "command": "ocrmnavigator.showCommandsReference",
+          "when": "view == ocrmnavigatorNavigator",
+          "group": "navigation@14"
+        },
+        {
+          "command": "ocrmnavigator.viewMarkdownGuide",
+          "when": "view == ocrmnavigatorNavigator",
+          "group": "navigation@14"
+        }
+      ]
     }
   },
   "scripts": {
