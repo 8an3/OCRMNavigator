@@ -246,6 +246,16 @@
         "command": "ocrmnavigator.addFilesToNavigator",
         "title": "Batch Add to CRM Navigator",
         "category": "OCRM Navigator"
+      },
+      {
+        "command": "ocrmnavigator.copySnippetToClipboard",
+        "title": "Copy Snippet Body",
+        "category": "OCRM Navigator"
+      },
+      {
+        "command": "ocrmnavigator.search",
+        "title": "Search in Navigator",
+        "category": "OCRM Navigator"
       }
     ],
     "views": {
@@ -412,6 +422,11 @@
           "group": "7_move@2"
         },
         {
+          "command": "ocrmnavigator.copySnippetToClipboard",
+          "when": "view == ocrmnavigatorNavigator && viewItem == snippet",
+          "group": "8_snippets@1"
+        },
+        {
           "command": "ocrmnavigator.createSnippet",
           "when": "view == ocrmnavigatorNavigator && viewItem == snippet",
           "group": "8_snippets@1"
@@ -490,6 +505,12 @@
         }
       ],
       "view/title": [
+        {
+          "command": "ocrmnavigator.search",
+          "when": "view == ocrmnavigatorNavigator",
+          "group": "navigation@10",
+          "icon": "$(search)"
+        },
         {
           "command": "ocrmnavigator.addCategory",
           "when": "view == ocrmnavigatorNavigator",
@@ -574,14 +595,17 @@
     "test": "vscode-test"
   },
   "devDependencies": {
-    "@types/vscode": "^1.98.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "20.x",
+    "@types/vscode": "^1.98.0",
     "@typescript-eslint/eslint-plugin": "^8.28.0",
     "@typescript-eslint/parser": "^8.28.0",
-    "eslint": "^9.23.0",
-    "typescript": "^5.8.2",
     "@vscode/test-cli": "^0.0.10",
-    "@vscode/test-electron": "^2.4.1"
+    "@vscode/test-electron": "^2.4.1",
+    "eslint": "^9.23.0",
+    "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "fuse.js": "^7.1.0"
   }
 }

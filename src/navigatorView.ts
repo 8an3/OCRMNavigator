@@ -1,6 +1,8 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
+import Fuse from 'fuse.js';
+
 
 export interface NavigatorConfig { categories: NavigatorCategoryItem[]; }
 
@@ -12,7 +14,23 @@ export interface NavigatorItem {
   collapsibleState: vscode.TreeItemCollapsibleState;
   filePath: string;
   children?: NavigatorItem[];
+  body?: string;
 }
+export interface NavigatorQuickPickItem extends vscode.QuickPickItem {
+  label: string;
+  description: string;
+  picked: boolean;
+  alwaysShow: boolean;
+  filePath: string;
+  data?: any; // Add this
+}
+
+// 81323 
+// detail: (item as NavigatorItem).filePath || '',
+// 1-866-261-9799
+
+
+// 613-604-5183
 
 export interface NavigatorCategoryItem extends NavigatorItem {
   readonly type: 'folder';
@@ -22,6 +40,7 @@ export interface NavigatorCategoryItem extends NavigatorItem {
 
 export class NavigatorItem extends vscode.TreeItem {
   public children?: NavigatorItem[];
+  public detail?: string;
 
   constructor(
     public label: string,
@@ -29,9 +48,11 @@ export class NavigatorItem extends vscode.TreeItem {
     public filePath: string = '',
     public type?: 'file' | 'url' | 'command' | 'category' | 'folder' | 'md' | 'snippet' | 'powershellCommand',
     public hasChildren?: boolean,
+    detail?: string
   ) {
     super(label, collapsibleState);
     this.contextValue = type || 'file';
+    this.detail = detail;
 
     if (type === 'file') {
       this.command = {
@@ -84,12 +105,222 @@ export class NavigatorItem extends vscode.TreeItem {
     this.tooltip = filePath || label;
   }
 }
+export interface NavigatorQuickPickItem extends vscode.QuickPickItem {
+  data: NavigatorItem;
+}
+
+/**  const results = advancedFuzzyFilter(allItems, text, ['label', 'description', 'filePath'],  {
+        weights: { 
+          name: 3, 
+          description: 1, 
+          category: 2 
+        } as Partial<Record<keyof NavigatorItem, number>>,
+        threshold: 0.3,
+        maxEditDistance: 2,
+        cacheResults: true
+      }); */
+// full features filter not currentylyworking
+function advancedFuzzyFilter<T>(
+  items: T[],
+  search: string,
+  keys: (keyof T)[],
+  options: {
+    threshold?: number;
+    weights?: Partial<Record<keyof T, number>>;
+    maxEditDistance?: number;
+    cacheResults?: boolean;
+  } = {}
+): Array<{ item: T, score: number }> {
+  // Early return for empty search
+  if (!search) return items.map(item => ({ item, score: 1 }));
+
+  // Options with defaults
+  const {
+    threshold = 0,
+    weights = {} as Partial<Record<keyof T, number>>,
+    maxEditDistance = 2,
+    cacheResults = true
+  } = options;
+
+  const searchLower = search.toLowerCase();
+  const searchTerms = searchLower.split(/\s+/).filter(term => term.length > 0);
+
+  // Return all items with perfect score if no meaningful search terms
+  if (searchTerms.length === 0) return items.map(item => ({ item, score: 1 }));
+
+  // Setup memoization for performance
+  const levenshteinCache: Record<string, number> = {};
+  const textCache: Record<string, string> = {};
+
+  // Calculate Levenshtein distance with memoization
+  function levenshtein(a: string, b: string): number {
+    // Ensure smaller string is first parameter for consistent caching
+    if (b.length < a.length) [a, b] = [b, a];
+
+    const cacheKey = `${a}|${b}`;
+    if (cacheResults && levenshteinCache[cacheKey] !== undefined) {
+      return levenshteinCache[cacheKey];
+    }
+
+    if (a.length === 0) return b.length;
+    if (b.length === 0) return a.length;
+
+    const matrix: number[][] = [];
+
+    // Initialize matrix
+    for (let i = 0; i <= b.length; i++) {
+      matrix[i] = [i];
+    }
+    for (let j = 0; j <= a.length; j++) {
+      matrix[0][j] = j;
+    }
+
+    // Fill matrix
+    for (let i = 1; i <= b.length; i++) {
+      for (let j = 1; j <= a.length; j++) {
+        const cost = a[j - 1] === b[i - 1] ? 0 : 1;
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j] + 1,      // deletion
+          matrix[i][j - 1] + 1,      // insertion
+          matrix[i - 1][j - 1] + cost // substitution
+        );
+      }
+    }
+
+    const result = matrix[b.length][a.length];
+    if (cacheResults) {
+      levenshteinCache[cacheKey] = result;
+    }
+    return result;
+  }
+
+  // Get key text with caching
+  function getItemText(item: T, key: keyof T): string {
+    const cacheKey = item + '|' + String(key);
+    if (cacheResults && textCache[cacheKey] !== undefined) {
+      return textCache[cacheKey];
+    }
+
+    const value = item[key];
+    const text = typeof value === 'string' ? value.toLowerCase() : '';
+
+    if (cacheResults) {
+      textCache[cacheKey] = text;
+    }
+    return text;
+  }
+
+  const results = items
+    .map(item => {
+      // Calculate the max possible score based on weights
+      let maxPossibleScore = 0;
+      keys.forEach(key => {
+        maxPossibleScore += weights[key] || 1;
+      });
+
+      // Calculate score for each search term against each weighted key
+      let totalScore = 0;
+
+      for (const term of searchTerms) {
+        let termMaxScore = 0;
+
+        for (const key of keys) {
+          const text = getItemText(item, key);
+          const keyWeight = weights[key] || 1;
+
+          // Early return for exact matches (maximum possible score)
+          if (text === term) {
+            termMaxScore = keyWeight;
+            break; // No need to check other keys, this is the best match
+          }
+
+          // Try containing match (high score)
+          if (text.includes(term)) {
+            const contextScore = keyWeight * 0.9; // Slightly reduced for non-exact match
+            termMaxScore = Math.max(termMaxScore, contextScore);
+            continue; // Check other keys in case there's a better match
+          }
+
+          // Try partial word matching
+          const words = text.split(/\s+/);
+          let bestPartialScore = 0;
+
+          for (const word of words) {
+            // Exact word match
+            if (word === term) {
+              bestPartialScore = keyWeight * 0.9;
+              break;
+            }
+
+            // Partial match (word contains term or term contains word)
+            if (word.includes(term) || term.includes(word)) {
+              // Score based on how much of the term matches
+              const matchRatio = Math.min(term.length, word.length) /
+                Math.max(term.length, word.length);
+              const partialScore = keyWeight * matchRatio * 0.8;
+              bestPartialScore = Math.max(bestPartialScore, partialScore);
+            }
+          }
+
+          if (bestPartialScore > 0) {
+            termMaxScore = Math.max(termMaxScore, bestPartialScore);
+            continue; // Check other keys in case there's a better match
+          }
+
+          // Try edit distance for typo tolerance
+          let bestDistanceScore = 0;
+
+          for (const word of words) {
+            // Only check words of similar length to save computation
+            if (Math.abs(word.length - term.length) <= maxEditDistance) {
+              const distance = levenshtein(term, word);
+              if (distance <= maxEditDistance) {
+                // Score based on edit distance (lower distance = higher score)
+                const similarityScore = 1 - (distance / Math.max(maxEditDistance + 1, term.length));
+                const distanceScore = keyWeight * similarityScore * 0.6; // Lower score for typo matches
+                bestDistanceScore = Math.max(bestDistanceScore, distanceScore);
+              }
+            }
+          }
+
+          termMaxScore = Math.max(termMaxScore, bestDistanceScore);
+        }
+
+        totalScore += termMaxScore;
+      }
+
+      // Normalize score between 0 and 1
+      const normalizedScore = maxPossibleScore > 0 ?
+        totalScore / (searchTerms.length * maxPossibleScore / keys.length) : 0;
+
+      return {
+        item,
+        score: normalizedScore
+      };
+    })
+    .filter(result => result.score >= threshold)
+    .sort((a, b) => b.score - a.score);
+  console.log('results', results)
+  return results;
+}
 export class NavigatorProvider implements vscode.TreeDataProvider<NavigatorItem> {
   private _onDidChangeTreeData: vscode.EventEmitter<NavigatorItem | undefined | null | void> = new vscode.EventEmitter<NavigatorItem | undefined | null | void>();
   readonly onDidChangeTreeData: vscode.Event<NavigatorItem | undefined | null | void> = this._onDidChangeTreeData.event;
   private firstItem: NavigatorItem | undefined;
   public config: NavigatorConfig | null = null;
   private configWatcher: vscode.FileSystemWatcher;
+  private _items: NavigatorItem[] = [];
+
+  // Getter for items
+  get items(): NavigatorItem[] {
+    return this._items;
+  }
+
+  // Add these properties to your NavigatorProvider class
+  private searchText: string = '';
+  private searchInFileContents: boolean = false;
+  // Add missing property for fileContentSearchResults
+  private fileContentSearchResults: NavigatorItem[] = [];
 
   constructor(private workspaceRoot: string, private configPath: string) {
     this.configWatcher = vscode.workspace.createFileSystemWatcher(configPath);
@@ -296,7 +527,414 @@ export class NavigatorProvider implements vscode.TreeDataProvider<NavigatorItem>
       return item;
     }
   }
+  async getAllItems(): Promise<NavigatorItem[]> {
+    if (!this.config) return [];
 
+    const items: NavigatorItem[] = [];
+
+    const collectItems = (itemsArray: NavigatorItem[]) => {
+      for (const item of itemsArray) {
+        // Create the basic item
+        const newItem = this.createFileItem(
+          item.label,
+          item.path || '',
+          item.type,
+          isCategoryItem(item) ? item.items : undefined,
+          isCategoryItem(item) ? item.expanded : undefined
+        );
+
+        items.push(newItem);
+
+        // Recursively collect nested items if this is a category/folder
+        if (isCategoryItem(item)) {
+          collectItems(item.items);
+        }
+      }
+    };
+
+    // Helper type guard
+    function isCategoryItem(item: NavigatorItem): item is NavigatorCategoryItem {
+      return item.type === 'folder' && 'items' in item;
+    }
+
+    // Collect from all categories
+    for (const category of this.config.categories) {
+      collectItems(category.items);
+    }
+
+    console.log('Collected items:', items);
+    return items;
+  }
+  // You might already have a method like this that you can use instead
+  getAllNavigatorItems(): NavigatorItem[] {
+    // Collect all items from your tree data
+    const allItems: NavigatorItem[] = [];
+
+    // Logic to collect all items from your data structure
+    // For example, recursively traversing your tree
+    const collectItems = (items: NavigatorItem[]) => {
+      for (const item of items) {
+        allItems.push(item);
+        if (item.children) {
+          collectItems(item.children);
+        }
+      }
+    };
+
+    // Start from your root items
+    collectItems(this.items || []);
+
+    return allItems;
+  }
+  // Add these methods to NavigatorProvider class
+  public setSearchText(text: string): void {
+    this.searchText = text;
+    this.refresh();
+  }
+
+  public setSearchInFileContents(value: boolean): void {
+    this.searchInFileContents = value;
+    if (this.searchText) {
+      this.refresh(); // Only refresh if there's an active search
+    }
+  }
+
+  // Add a getter method for the search option
+  public getSearchInFileContents(): boolean {
+    return this.searchInFileContents;
+  }
+
+  // Add this method to get quick pick search results
+  public async getQuickPickSearchResults21(searchText: string): Promise<vscode.QuickPickItem[]> {
+    const results: vscode.QuickPickItem[] = [];
+    if (!this.config) return results;
+
+    // Search through config items
+    for (const category of this.config.categories) {
+      this.searchInCategory(category, searchText, results);
+    }
+
+    // If toggled on, search in file contents
+    if (this.searchInFileContents && searchText.length > 2) { // Only search files if at least 3 chars
+      await this.searchInFiles(searchText, results);
+    }
+
+    return results;
+  }
+
+  // Add methods to search through config and files
+  private searchInCategory(category: NavigatorCategoryItem, searchText: string, results: vscode.QuickPickItem[]): void {
+    // Check if category name matches
+    if (category.label.toLowerCase().includes(searchText.toLowerCase())) {
+      results.push({
+        label: `$(folder) ${category.label}`,
+        description: 'Category'
+      });
+    }
+
+    // Search through items
+    for (const item of category.items) {
+      if (item.label.toLowerCase().includes(searchText.toLowerCase())) {
+        const icon = this.getIconForType(item.type || 'file');
+        results.push({
+          label: `${icon} ${item.label}`,
+          description: item.path || '',
+          detail: `In ${category.label}`
+        });
+      }
+
+      // Search in nested folders
+      if (item.type === 'folder' && 'items' in item) {
+        this.searchInCategory(item as NavigatorCategoryItem, searchText, results);
+      }
+    }
+  }
+
+  // Helper to get icon for item type
+  private getIconForType(type: string): string {
+    switch (type) {
+      case 'folder': return '$(folder)';
+      case 'file': return '$(file)';
+      case 'url': return '$(link-external)';
+      case 'command': return '$(terminal)';
+      case 'md': return '$(markdown)';
+      case 'snippet': return '$(symbol-snippet)';
+      case 'powershellCommand': return '$(play)';
+      default: return '$(file)';
+    }
+  }
+
+  // Method to search through actual file contents
+  private async searchInFiles(searchText: string, results: vscode.QuickPickItem[]): Promise<void> {
+    // Get all file paths from config
+    // Fix: Define a proper interface for file paths
+    interface FilePathInfo {
+      path: string;
+      label: string;
+    }
+
+    const filePaths: FilePathInfo[] = [];
+
+    const collectPaths = (items: any[]) => {
+      for (const item of items) {
+        if (item.type === 'file' || item.type === 'md' || item.type === 'snippet') {
+          if (item.path && !item.path.startsWith('http')) {
+            const fullPath = path.isAbsolute(item.path)
+              ? item.path
+              : path.join(this.workspaceRoot, item.path);
+            filePaths.push({
+              path: fullPath,
+              label: item.label
+            });
+          }
+        }
+
+        // Check for nested items
+        if (item.items) {
+          collectPaths(item.items);
+        }
+      }
+    };
+
+    // Collect paths from all categories
+    for (const category of this.config!.categories) {
+      collectPaths(category.items);
+    }
+
+    // Search through each file
+    for (const fileInfo of filePaths) {
+      try {
+        if (fs.existsSync(fileInfo.path)) {
+          const content = fs.readFileSync(fileInfo.path, 'utf8');
+
+          if (content.toLowerCase().includes(searchText.toLowerCase())) {
+            // Find the line containing the match
+            const lines = content.split('\n');
+            const matchingLineIndex = lines.findIndex(line =>
+              line.toLowerCase().includes(searchText.toLowerCase())
+            );
+
+            const matchingLine = matchingLineIndex !== -1
+              ? lines[matchingLineIndex].trim()
+              : '';
+
+            results.push({
+              label: `$(search) ${fileInfo.label}`,
+              description: path.basename(fileInfo.path),
+              detail: matchingLine ? `Line ${matchingLineIndex + 1}: ${matchingLine}` : 'Match in file'
+            });
+          }
+        }
+      } catch (error) {
+        console.error(`Error searching file ${fileInfo.path}:`, error);
+      }
+    }
+  }
+
+  // Update your tree view to handle search results
+  public getSearchResults(): Thenable<NavigatorItem[]> {
+    if (!this.searchText || !this.config) {
+      return Promise.resolve([]);
+    }
+
+    const results: NavigatorItem[] = [];
+    const searchText = this.searchText.toLowerCase();
+
+    // Helper to add matching item
+    const addMatchingItem = (item: any, category: string) => {
+      const navItem = this.createFileItem(
+        item.label,
+        item.path || '',
+        item.type || 'file'
+      );
+
+      // Add category context to the tooltip
+      navItem.tooltip = `${navItem.tooltip}\n(In ${category})`;
+
+      results.push(navItem);
+    };
+
+    // Search in categories and items
+    for (const category of this.config.categories) {
+      // Check if category name matches
+      if (category.label.toLowerCase().includes(searchText)) {
+        results.push(new NavigatorItem(
+          `${category.label} (Category)`,
+          vscode.TreeItemCollapsibleState.None,
+          '',
+          'folder'
+        ));
+      }
+
+      // Search in items
+      this.searchInItems(category.items, searchText, category.label, results, addMatchingItem);
+    }
+
+    // If enabled, search in file contents
+    if (this.searchInFileContents && searchText.length > 2) {
+      // Add a placeholder while searching files
+      results.push(new NavigatorItem(
+        '-- Searching file contents... --',
+        vscode.TreeItemCollapsibleState.None
+      ));
+
+      // Start file search asynchronously and refresh again when done
+      this.searchFileContents(searchText).then(() => {
+        this.refresh();
+      });
+    }
+
+    return Promise.resolve(results);
+  }
+
+  // Helper to search through items
+  private searchInItems(items: any[], searchText: string, categoryName: string,
+    results: NavigatorItem[], addMatchingFn: Function): void {
+    for (const item of items) {
+      // Check if item label matches
+      if (item.label.toLowerCase().includes(searchText)) {
+        addMatchingFn(item, categoryName);
+      }
+
+      // If it's a folder, search inside it
+      if (item.type === 'folder' && item.items) {
+        this.searchInItems(item.items, searchText, `${categoryName} > ${item.label}`, results, addMatchingFn);
+      }
+    }
+  }
+
+  // Method to search file contents and update results
+  private async searchFileContents(searchText: string): Promise<void> {
+    // Implement file content search similar to getQuickPickSearchResults method
+    // but store results to be shown in the tree view
+    this.fileContentSearchResults = []; // Clear previous results
+
+    // Get all file paths from config
+    interface FilePathInfo {
+      path: string;
+      label: string;
+      category: string;
+    }
+
+    const filePaths: FilePathInfo[] = [];
+
+    // Collect paths (similar to the implementation in getQuickPickSearchResults)
+    // Add implementation here
+
+    // Search through each file
+    // Add implementation here
+
+    // No need to return anything, we'll refresh the view when done
+  }
+
+  public handleSearchResultSelection(item: vscode.QuickPickItem & NavigatorItem): void {
+    if (!item.type) return;
+    console.log(item.label, item.type, 'item')
+    // Match EXACTLY what happens when clicking items in the tree view
+    switch (item.type) {
+      case 'file':
+      case 'md':
+      case 'snippet':
+        // Same as left-click - opens the file
+        vscode.commands.executeCommand('vscode.open', vscode.Uri.file(item.filePath));
+        break;
+
+      case 'url':
+        // Same as left-click - opens the URL
+        vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(item.filePath));
+        break;
+
+      case 'command':
+        // Same as left-click - executes the command
+        if (item.cmd) {
+          vscode.commands.executeCommand('ocrmnavigator.executeCommand', {
+            label: item.label,
+            cmd: item.cmd,
+            type: 'command'
+          });
+        }
+        break;
+
+      case 'powershellCommand':
+        // Same as left-click - executes the PowerShell command
+        vscode.commands.executeCommand('ocrmnavigator.executeItem', {
+          label: item.label,
+          path: item.filePath,
+          type: 'powershellCommand'
+        });
+        break;
+
+      case 'folder':
+        // For folders - focuses it in the tree view
+        this.revealItemInTree(item);
+        break;
+
+      default:
+        vscode.window.showWarningMessage(`No action defined for ${item.type} items`);
+    }
+  }
+
+  async getQuickPickSearchResults(text: string): Promise<vscode.QuickPickItem[]> {
+    console.log("Search term:", text);
+    console.log("Search options:", this.getSearchInFileContents());
+
+    // Get all items
+    const allItems = await this.getAllItems();
+
+    // Early return if no search text
+    if (!text.trim()) {
+      return [];
+    }
+
+    try {
+      // Perform fuzzy search
+      const searchResults = advancedFuzzyFilter(
+        allItems,
+        text,
+        ['label', 'description', 'filePath'],
+      );
+      console.log("Search term:", text);
+
+      // Convert results to QuickPickItems - NOTE THE .item ACCESSOR
+      return searchResults.map(({ item }) => ({
+        label: item.label,
+        description: typeof item.description === 'string' ? item.description : undefined,
+        detail: item.filePath || undefined,
+        data: item
+      }));
+    } catch (error) {
+      console.error('Search failed:', error);
+      // Fallback to simple search
+      const searchLower = text.toLowerCase();
+      return allItems
+        .filter(item => {
+          const labelMatch = item.label.toLowerCase().includes(searchLower);
+          const descMatch = typeof item.description === 'string'
+            ? item.description.toLowerCase().includes(searchLower)
+            : false;
+          return labelMatch || descMatch;
+        })
+        .map(item => ({
+          label: item.label,
+          description: typeof item.description === 'string' ? item.description : undefined,
+          detail: item.filePath || undefined,
+          data: item
+        }));
+    }
+  }
+
+  private async revealItemInTree(item: NavigatorItem): Promise<void> {
+    // Get the tree view by its ID
+    const treeView = vscode.window.createTreeView('ocrmnavigatorNavigator', {
+      treeDataProvider: this // Assuming this class is the TreeDataProvider
+    });
+
+    // Reveal the item in the tree view
+    await treeView.reveal(item, { select: true, focus: true });
+
+    // Dispose of the tree view reference to avoid memory leaks
+    treeView.dispose();
+  }
 
 
 

@@ -357,8 +357,6 @@ V. [Roadmap](#roadmap)
 </details>
 
 
-
-
 >Along with some others but you get the idea... Never used to, but using 2 nav panes on either side feels good with this extension. As your commands are never too far to use, or too many clicks away.
   
 ## Usage
@@ -402,6 +400,9 @@ V. [Roadmap](#roadmap)
 | `Add Snippet` | Create new grouping |  Dropdown menu.   |
 | `Edit Snippet` | Change category name | Right-click item |
 | `Remove Snippet` | Reorder category position | Right-click item |
+| `Copy Snippet` |  From the folder pane right clight to copy without having to open it | Right-click item |
+| `Remove Snippet` | Reorder category position | Right-click item |
+
 
 ##### FOLDERS
 
@@ -465,8 +466,14 @@ V. [Roadmap](#roadmap)
 
 1. Need to include more markdown examples. ie, accordian ( check other readmes for others)
 2. SEARCH bar at the top for even quickr access or search for soemthing you know is there but dont remember where alot
-3. along with pre fix, right click snippet file to copy snippet body, if you were search down the list withg your mouse you might as well just coipy the contents there instead of opening and all that
 4. rename snippet
+5.  edit web url label
+6.  edit label terminal comands
+7.  edit cmd terminal commands
+8.  edit command label
+8.  edit snipptt label
+8.  edit powershel label
+9.  delte powershel 
 
 </details>
 
@@ -512,11 +519,8 @@ Open a Pull Request
 
 Open an Issue
 
-Rant //
-Dont waste my time creating something so complicated it takes half my day to learn it, for a tool that didnt even need to be that way. Only to find out it sucks, not only just to use ( from a user experience aspect ) but also crashes out everytime I'm about to use it. On the other end of the spectrum stop building tools that are just horrible. Just because you dont know how to do something, doesnt mean you cant learn. I didnt know how to do code anything in this extension when I started. Started with one goal in mind, a quick access file explorer. That obviously went down the rabbit hole. Wanting to fix every app I use, and hated using ( almost all of them, I'll get to the others later ). It's going to feel good deleting them, never to see them again. Also to whoever designed the snippets format, what the fuck were you smoking that day bud? Sorry, but geeze... we can tell it only took you a day to wrap up and ship it and went, 'fuck it... YEET!!'. Meanwhile, we are apparently forever stuck with this format. But hey atleast I figured out a workaround, that no other dev has thought of. Surprising, since this is my first year coding.
+## Snippet Review
 
-Anyways... 
-Atleast have some pride in your work. For example, this will receive updates and changes as time goes on since I don't see myself coding without these features. There will also be more features added down the road.
 
 ### Keep your stick on the ice! 🚀
 

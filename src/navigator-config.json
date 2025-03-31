@@ -13,13 +13,13 @@
           "filePath": ""
         },
         {
-          "label": "save all",
-          "path": "workbench.action.files.saveAll",
+          "label": "format",
+          "path": "editor.action.formatDocument",
           "type": "command"
         },
         {
-          "label": "format",
-          "path": "editor.action.formatDocument",
+          "label": "save all",
+          "path": "workbench.action.files.saveAll",
           "type": "command"
         },
         {
@@ -38,7 +38,7 @@
           "type": "command"
         },
         {
-          "label": "other",
+          "label": "+ vscode cmds",
           "type": "folder",
           "expanded": false,
           "items": [
@@ -53,8 +53,8 @@
               "type": "command"
             },
             {
-              "label": "ufold",
-              "path": "editor.unfold",
+              "label": "unfoldAll",
+              "path": "editor.unfoldAll",
               "type": "command"
             },
             {
@@ -76,26 +76,23 @@
               "label": "toggle zen mode",
               "path": "workbench.action.toggleZenMode",
               "type": "command"
-            },
-            {
-              "label": "git init",
-              "path": "git.init",
-              "type": "command"
-            },
-            {
-              "label": "git commitAll",
-              "path": "git.commitAll",
-              "type": "command"
             }
           ],
           "collapsibleState": 1,
           "filePath": ""
         },
         {
-          "label": "terminal",
+          "label": "term meth",
           "type": "folder",
           "expanded": false,
           "items": [
+            {
+              "label": "all nuclear",
+              "path": "nuclear:all",
+              "type": "powershellCommand",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
             {
               "label": "app dev",
               "path": "meth dev:app",
@@ -190,6 +187,29 @@
             {
               "label": "all build",
               "path": "meth clean:all",
+              "type": "powershellCommand",
+              "collapsibleState": 0,
+              "filePath": ""
+            }
+          ],
+          "collapsibleState": 1,
+          "filePath": ""
+        },
+        {
+          "label": "term general",
+          "type": "folder",
+          "expanded": false,
+          "items": [
+            {
+              "label": "patch current dir",
+              "path": "git add . && git commit -m \\\"Cleaning w/ push\\\" && git push && pnpm version patch && git push && git push --tags",
+              "type": "powershellCommand",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "commit and push current dir",
+              "path": "git add . && git commit -m \"Cleaning w/ push\" && git push",
               "type": "powershellCommand",
               "collapsibleState": 0,
               "filePath": ""
@@ -404,6 +424,11 @@
               "type": "url"
             },
             {
+              "label": "shad github examples",
+              "path": "https://github.com/shadcn-ui/ui/tree/main/apps/www/app/(app)/examples",
+              "type": "url"
+            },
+            {
               "label": "lucide",
               "path": "https://lucide.dev/icons/",
               "type": "url"
@@ -442,12 +467,194 @@
       "expanded": true,
       "items": [
         {
-          "label": "shadCN",
+          "label": "shadCN comps",
           "type": "folder",
           "expanded": false,
           "items": [
-         
+            {
+              "label": "shad accordian",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "shad alert",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "shad alert dialog",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "shad calendar",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "shad card",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "shad collapsible",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "shad combobox",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "shad command",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "shad command dialog",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "shad context menu",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "shad date picker",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "shad dialog",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "shad drawer",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "shad dropdown menu",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "shad hover card",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "shad menu bar",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "shad navigation menu",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "shad pagination",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "shad popover",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "shad progress",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "shad radio group ",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "shad select",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "shad sheet ",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "shad tabs",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "shad tool tip",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            }
           ],
+          "collapsibleState": 1,
+          "filePath": ""
+        },
+        {
+          "label": "shadCN examples",
+          "type": "folder",
+          "expanded": false,
+          "items": [],
           "collapsibleState": 1,
           "filePath": ""
         },
@@ -455,7 +662,197 @@
           "label": "FUNCTIONS",
           "type": "folder",
           "expanded": false,
-          "items": [],
+          "items": [
+            {
+              "label": "searchable input",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "searchable input 2",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "error checking action",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "map function",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "on click form submission",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "cors",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "button transition action",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "catch boundary",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "load button",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "links function",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "v2 headers",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "v2 loader",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "session loader",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "authenticate",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "api route",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "button navigation action",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "pending button link",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "seo handle",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "error boundary",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "headers",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "meta function",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "action function",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "loader function params",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "loader session",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "create new remix file",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "client only with out remix utils",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "client only with remix utils",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            }
+          ],
           "collapsibleState": 1,
           "filePath": ""
         },
@@ -463,7 +860,78 @@
           "label": "ONE LINERS",
           "type": "folder",
           "expanded": false,
-          "items": [],
+          "items": [
+            {
+              "label": "error success try with toast",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "loader for redirecting bad requiests",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "action for redirecting bad requests",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "toggle prev state",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "v2 action",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "nav link",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "handle for use with useMatches",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "headers function",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "auth loader",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "useEffect",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            }
+          ],
           "collapsibleState": 1,
           "filePath": ""
         },
@@ -471,7 +939,29 @@
           "label": "RANDOM",
           "type": "folder",
           "expanded": false,
-          "items": [],
+          "items": [
+            {
+              "label": "submodules cmds",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "fresh vercel server also needs these installed",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            },
+            {
+              "label": "nice looking text classnames",
+              "path": ".vscode/ocrmnavigator.code-snippets",
+              "type": "snippet",
+              "collapsibleState": 0,
+              "filePath": ""
+            }
+          ],
           "collapsibleState": 1,
           "filePath": ""
         },
@@ -483,6 +973,7 @@
           "collapsibleState": 1,
           "filePath": ""
         }
+      
       ],
       "collapsibleState": 1,
       "filePath": ""
@@ -490,7 +981,7 @@
     {
       "label": "DEV MAP",
       "type": "folder",
-      "expanded": true,
+      "expanded": false,
       "items": [
         {
           "label": "devMap",

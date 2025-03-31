@@ -1,8 +1,169 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
-import { NavigatorProvider, NavigatorItem, NavigatorConfig, NavigatorCategoryItem } from './navigatorView';
+import { NavigatorProvider, NavigatorItem, NavigatorConfig, NavigatorCategoryItem, NavigatorQuickPickItem } from './navigatorView';
 import * as os from 'os';
+
+let lastInteractionWasRightClick = false;
+
+async function showContextMenuForItem(item: NavigatorItem) {
+    const options = [
+        { label: '$(copy) Copy Path', action: 'copy' },
+        { label: '$(file-directory) Reveal in Explorer', action: 'reveal' },
+        { label: '$(edit) Edit', action: 'edit' },
+        { label: '$(edit) Edit Label', action: 'editLabel' },
+        { label: '$(trash) Delete', action: 'delete' }
+    ];
+
+    const selected = await vscode.window.showQuickPick(options.map(x => x.label), { placeHolder: `Action for ${item.label}` });
+
+    if (selected) {
+        const action = options.find(x => x.label === selected)?.action;
+        switch (action) {
+            case 'copy':
+                if (item.filePath) {
+                    if (item.type === 'file') {
+                        await vscode.commands.executeCommand('ocrmnavigator.copyPath');
+                        await vscode.env.clipboard.writeText(String(item.filePath));
+                        return;
+                    }
+                    if (item.type === 'url') {
+                        if (item.path) {
+                            await vscode.env.clipboard.writeText(item.path);
+                            await vscode.commands.executeCommand('ocrmnavigator.copyPath');
+                            return;
+                        }
+                    }
+                    if (item.type === 'command') {
+                        if (item.path) {
+                            await vscode.env.clipboard.writeText(item.path);
+                        }
+                        return;
+                    }
+                    if (item.type === 'folder') {
+                        return;
+                    }
+                    if (item.type === 'md') {
+                        await vscode.env.clipboard.writeText(String(item));
+                        return;
+                    }
+                    if (item.type === 'snippet') {
+                        await vscode.env.clipboard.writeText(String(item.body));
+                        return;
+                    }
+                    if (item.type === 'powershellCommand') {
+                        await vscode.env.clipboard.writeText(String(item.path));
+                        return;
+                    }
+                }
+                break;
+            case 'reveal':
+                if (item.filePath) {
+                    vscode.commands.executeCommand('revealFileInOS', vscode.Uri.file(item.filePath));
+                }
+                break;
+            case 'edit':
+                // Implement edit
+                if (item.filePath) {
+                    if (item.type === 'file') {
+                        await vscode.commands.executeCommand('ocrmnavigator.editFileLabel');
+                        return;
+                    }
+                    if (item.type === 'url') {
+                        await vscode.commands.executeCommand('ocrmnavigator.editWebUrl');
+                        return;
+                    }
+                    if (item.type === 'command') {
+                        vscode.commands.executeCommand('ocrmnavigator.editCommand');
+                        return;
+                    }
+                    if (item.type === 'folder') {
+                        vscode.commands.executeCommand('ocrmnavigator.renameCategory');
+                        return;
+                    }
+                    if (item.type === 'md') {
+                        vscode.commands.executeCommand('ocrmnavigator.editMD');
+                        return;
+                    }
+                    if (item.type === 'snippet') {
+                        vscode.commands.executeCommand('ocrmnavigator.editSnippet');
+                        return;
+                    }
+                    if (item.type === 'powershellCommand') {
+                        vscode.commands.executeCommand('ocrmnavigator.editWebUrl');
+                        return;
+                    }
+                }
+                break;
+            case 'editLabel':
+                // Implement edit
+                if (item.filePath) {
+                    if (item.type === 'file') {
+                        await vscode.commands.executeCommand('ocrmnavigator.editFileLabel');
+                        return;
+                    }
+                    if (item.type === 'url') {
+                        await vscode.commands.executeCommand('ocrmnavigator.editWebUrl');
+                        return;
+                    }
+                    if (item.type === 'command') {
+                        vscode.commands.executeCommand('ocrmnavigator.editCommand');
+                        return;
+                    }
+                    if (item.type === 'folder') {
+                        vscode.commands.executeCommand('ocrmnavigator.renameCategory');
+                        return;
+                    }
+                    if (item.type === 'md') {
+                        vscode.commands.executeCommand('ocrmnavigator.editMDLabel');
+                        return;
+                    }
+                    if (item.type === 'snippet') {
+                        vscode.commands.executeCommand('ocrmnavigator.editSnippet');
+                        return;
+                    }
+                    if (item.type === 'powershellCommand') {
+                        vscode.commands.executeCommand('ocrmnavigator.editWebUrl');
+                        return;
+                    }
+                }
+                break;
+            case 'delete':
+                if (item.filePath) {
+                    if (item.type === 'file') {
+                        await vscode.commands.executeCommand('ocrmnavigator.deleteItem');
+                        return;
+                    }
+                    if (item.type === 'command') {
+                        await vscode.commands.executeCommand('ocrmnavigator.deleteItem');
+                        return;
+                    } if (item.type === 'folder') {
+                        await vscode.commands.executeCommand('ocrmnavigator.deleteCategory');
+                        return;
+                    } if (item.type === 'md') {
+                        await vscode.commands.executeCommand('ocrmnavigator.removeMD');
+                        return;
+                    } if (item.type === 'snippet') {
+                        await vscode.commands.executeCommand('ocrmnavigator.deleteSnippet');
+                        return;
+                    } if (item.type && item.type === 'command') { {
+                        vscode.commands.executeCommand('ocrmnavigator.removeCommand');
+                        return;
+                    } if (item.type === 'powershellCommand') {
+                        await vscode.commands.executeCommand('ocrmnavigator.removeCommand');
+                        return;
+                    }
+                }
+                // Implement delete
+                break;
+        }
+    }
+}}
+
+
+async function showContextMenu(item: NavigatorItem) {
+    return showContextMenuForItem(item);
+}
 
 export function activate(context: vscode.ExtensionContext) {
     console.log('Extension activating...');
@@ -1621,8 +1782,38 @@ X^2^ (superscript)</div>
             terminal.sendText(command);
         }, 500);
     }
+    const quickPick = vscode.window.createQuickPick();
+    const options = [
+        { label: '$(copy) Copy Path', action: 'copy' },
+        { label: '$(file-directory) Reveal in Explorer', action: 'reveal' },
+        { label: '$(edit) Edit', action: 'edit' },
+        { label: '$(edit) Edit Label', action: 'editLabel' },
+        { label: '$(trash) Delete', action: 'delete' }
+    ];
+    // Add right-click action button to each item
+    quickPick.items = options.map(item => ({
+        ...item,
+        buttons: [{
+            iconPath: new vscode.ThemeIcon('ellipsis'),
+            tooltip: 'More actions'
+        }]
+    }));
+
+
+    if (selected && (selected as NavigatorQuickPickItem).data) {    
+        // Handle button clicks (right-click alternative)
+        quickPick.onDidTriggerItemButton(e => {
+            showContextMenu(e.item.data as NavigatorItem);
+        });}
+
+
+
+
+    //---------------------------------------------------------
 
     context.subscriptions.push(
+
+
         // DRAG AND DROP 
         vscode.commands.registerCommand('ocrmnavigator.moveItem', (item: NavigatorItem) => {
             itemToMove = item;
@@ -2675,6 +2866,8 @@ X^2^ (superscript)</div>
 
 
         // URL
+        //
+
         vscode.commands.registerCommand('ocrmnavigator.addUrlToNavigator', async () => {
             try {
                 // Get URL from user
@@ -3286,7 +3479,8 @@ X^2^ (superscript)</div>
                     path: `.vscode/ocrmnavigator.code-snippets`,
                     type: 'snippet',
                     collapsibleState: vscode.TreeItemCollapsibleState.None,
-                    filePath: ''
+                    filePath: '',
+                    data: {} as NavigatorItem
                 });
 
                 // Save the updated config
@@ -3500,7 +3694,68 @@ X^2^ (superscript)</div>
                 vscode.window.showErrorMessage(`Failed to edit snippet: ${errorMessage}`);
             }
         }),
+        vscode.commands.registerCommand('ocrmnavigator.copySnippetToClipboard', async (item: NavigatorItem) => {
+            try {
+                if (!workspaceRoot) {
+                    vscode.window.showErrorMessage('No workspace folder open');
+                    return;
+                }
 
+                // Validate that we have a snippet item
+                if (!item || item.type !== 'snippet') {
+                    vscode.window.showWarningMessage('Selected item is not a snippet');
+                    return;
+                }
+
+                // Get the snippets file path - use item.path or fallback to default
+                const snippetsFilePath = path.join(
+                    workspaceRoot,
+                    item.path || ".vscode/ocrmnavigator.code-snippets"
+                );
+
+                if (!fs.existsSync(snippetsFilePath)) {
+                    vscode.window.showErrorMessage(`Snippets file not found at ${snippetsFilePath}`);
+                    return;
+                }
+
+                // Read the snippets JSON file
+                const snippetsContent = fs.readFileSync(snippetsFilePath, 'utf8');
+                const snippets = JSON.parse(snippetsContent);
+
+                // Get the snippet key - prioritize item.name, fallback to item.filePath
+                const snippetKey = item.label
+                    .toLowerCase()
+                    .replace(/\s+/g, '-')
+                    .replace(/[^a-z0-9-]/g, '');
+
+                if (!snippetKey) {
+                    vscode.window.showErrorMessage('No snippet key specified');
+                    return;
+                }
+
+                // Access the snippet data
+                const snippetData = snippets[snippetKey];
+                if (!snippetData) {
+                    vscode.window.showErrorMessage(`Snippet "${snippetKey}" not found in snippets file.`);
+                    return;
+                }
+
+                // Get the body content from the snippet data
+                const snippetBody = Array.isArray(snippetData.body)
+                    ? snippetData.body.join('\n')
+                    : snippetData.body || '';
+
+                // Copy to clipboard
+                await vscode.env.clipboard.writeText(snippetBody);
+
+                // Notify user
+                vscode.window.showInformationMessage(`✅ Snippet '${item.label}' copied to clipboard`);
+            } catch (error) {
+                vscode.window.showErrorMessage(
+                    `Failed to copy snippet: ${error instanceof Error ? error.message : String(error)}`
+                );
+            }
+        }),
 
         // MD
         vscode.commands.registerCommand('ocrmnavigator.createMD', async (parentItem?: NavigatorItem) => {
@@ -3849,8 +4104,15 @@ X^2^ (superscript)</div>
 
 
 
+
+
         watcher, view, { dispose: () => view.dispose() }
     );
+
+    //---------------------------------------------------------
+
+
+
     // Helper function for folder expansion
     async function updateFolderExpansion(item: NavigatorItem, expanded: boolean) {
         try {
@@ -4357,6 +4619,7 @@ X^2^ (superscript)</div>
             ["Tasks.ConfigureDefaultTestTask", "workbench.action.tasks.configureDefaultTestTask"]
         ];
 
+        let d
         // Combine all categories
         const allCommands = [
             ...iadded,
@@ -4376,7 +4639,7 @@ X^2^ (superscript)</div>
             ...gitCommands,
             ...taskCommands
         ];
-
+        d = allCommands
         // Define category mapping for the dropdown
         const categories = [
             { id: 'other', name: 'Other Commands', commands: commandArray },
@@ -4397,7 +4660,7 @@ X^2^ (superscript)</div>
             { id: 'git', name: 'Git Commands', commands: gitCommands },
             { id: 'task', name: 'Task Commands', commands: taskCommands }
         ];
-
+        6
         // Generate the dropdown options
         const categoryOptions = categories.map(category => {
             return `<option value="${category.id}">${category.name}</option>`;
@@ -4788,7 +5051,103 @@ X^2^ (superscript)</div>
     }))
 
 
+    // Add this to your activate function
+    // Create the search container with input and checkbox
+    const searchContainer = vscode.window.createWebviewPanel(
+        'ocrmnavigatorSearch',
+        'Search',
+        vscode.ViewColumn.One,
+        {
+            enableScripts: true,
+            retainContextWhenHidden: true
+        }
+    );
 
+    // Hide the panel initially - we'll use our own UI
+    searchContainer.dispose();
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('ocrmnavigator.search', () => {
+            const quickPick = vscode.window.createQuickPick<NavigatorQuickPickItem>();
+            quickPick.title = "OCRM Navigator Search";
+            quickPick.placeholder = 'Type to search...';
+            quickPick.ignoreFocusOut = true;
+
+            // Add toggle item
+            const toggleItem = {
+                label: "$(file) Search in file contents",
+                description: "Toggle this option",
+                picked: navigatorProvider.getSearchInFileContents(),
+                alwaysShow: true
+            };
+
+            // Initial items
+            quickPick.items = [toggleItem];
+
+            let searchTimeout: NodeJS.Timeout;
+            quickPick.onDidChangeValue(async (text) => {
+                clearTimeout(searchTimeout);
+
+                if (text) {
+                    searchTimeout = setTimeout(async () => {
+                        quickPick.busy = true;
+                        try {
+                            const results = await navigatorProvider.getQuickPickSearchResults(text);
+
+                            // Transform results with context menu buttons
+                            const quickPickItems: NavigatorQuickPickItem[] = results.map(item => ({
+                                label: item.label,
+                                description: item.description,
+                                detail: item.filePath,
+                                data: item,
+                                buttons: [{
+                                    iconPath: new vscode.ThemeIcon('ellipsis'),
+                                    tooltip: 'More actions'
+                                }]
+                            }));
+
+                            quickPick.items = [toggleItem, ...quickPickItems];
+
+                        } catch (error) {
+                            console.error("Search failed:", error);
+                        } finally {
+                            quickPick.busy = false;
+                        }
+                    }, 300);
+                } else {
+                    quickPick.items = [toggleItem];
+                }
+            });
+
+            // Handle item button clicks (context menu)
+            quickPick.onDidTriggerItemButton(e => {
+       showContextMenu(e.item.data as NavigatorItem);
+
+            });
+
+            // Handle item selection (left click/enter)
+            quickPick.onDidAccept(() => {
+                const selected = quickPick.activeItems[0];
+                if (selected && 'data' in selected) {
+                    quickPick.hide();
+                    navigatorProvider.handleSearchResultSelection(selected.data);
+                }
+            });
+
+            quickPick.show();
+        })
+    );
+    // Add search button to the view title
+    context.subscriptions.push(
+        vscode.window.registerTreeDataProvider('ocrmnavigatorNavigator', navigatorProvider)
+    );
+
+    context.subscriptions.push(
+        vscode.window.createTreeView('ocrmnavigatorNavigator', {
+            treeDataProvider: navigatorProvider,
+            showCollapseAll: true
+        })
+    );
 
 
     view.title = "F/F Navigator";
