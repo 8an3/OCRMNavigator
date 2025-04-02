@@ -6,6 +6,7 @@
 	  "lib": ["ES2020"],
 	  "sourceMap": true,
 	  "rootDir": "src",
+	  "jsx": "react",
 	  "strict": true
 	},
 	"include": ["src/**/*"],

@@ -47,6 +47,16 @@
           "submenu": "ocrmnavigator.actions",
           "when": "view == ocrmnavigatorNavigator",
           "group": "navigation"
+        },
+          {
+          "command": "ocrmnavigator.removeCommand",
+          "title": "Remove Command",
+          "category": "OCRM Navigator"
+        },
+        {
+          "command": "ocrmnavigator.removeCommand",
+          "when": "view == ocrmnavigatorNavigator && viewItem == command",
+          "group": "5_commands@3"
         }
       ] 
  }

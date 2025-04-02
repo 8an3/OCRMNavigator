@@ -36,11 +36,13 @@ V. [Roadmap](#roadmap)
    2. Rename existing categories
    3. Reorder categories (move up/down)
    4. Delete categories when no longer needed
-   5. Sub folders for even more organization
+   5. Sub folders for even more organization 
+   6. Right and click type movement 
+   7. For smaller movements, move up or down one
 3. URLs 
-   1. Instead of opening a browser and rummaging through your bookmarks, its your in your nav panel.
+   1.  Instead of opening a browser and rummaging through your bookmarks, its your in your nav panel.
 4. VSCode Commands
-   1. No limits on how many you can have, you can create as many directories / sub-directories of commands you need or ever want.
+   1.  No limits on how many you can have, you can create as many directories / sub-directories of commands you need or ever want.
    2.  Just a click away.
    3.  Command refernce sheet for those who need it. Didn't add commands as a default, since theres like 150-200 or even more maybe.
    4.  You can search, or view by category.
@@ -54,17 +56,21 @@ V. [Roadmap](#roadmap)
    4.  Your prefix gets created by converting your snippet name to all lower case letters and spaces turning into dashes ( - ). Thus giving you access to your snippets on the fly, just like any other ( Toggle State is then toggle-state as your prefix ).
    5.  No more wasting time with double quotes, or trying to make it look good by lining everything up... just save and fucking code dudes.
    6.  I know theres a work around, but still feels so clunky to us, in a tsx file, then in the snippets, then going back and click on the snippets file again to re render the snippets file and on and on. Where as with this one, you input the name, where you want to store it in the extension and if you already have the snippet in your clipboard it automatically pastes at file creation. Save, then move on to creating the next one. I find its not just the big things that can really waste your time. The small things you dont even notice or count towards wasting your time, but suck so much time out of your day... mainly due to dumb design decisions or the decision NOT to go back to improve it. Thats... basically the whole reason I HAD to start coding.
+   7.  Extended the functionality of our snippets.
+   8.  New Full featured Viewer, from the viewer with search command to search and view the filtered list, after selecting bring you to a viewer. Where you can view, select to edit, create new, remove and now even includes the easiest importer Ive seen yet when dealer with snippets
+   9.  Import by letting you select whatever snippet file you want, leaves the original untouched but copies over into its snippet file, when importing, if you do not already have a SNIPPETS folder it will create it for you in the extensions pane so you can access them in the extensions file structure. Thus letting you import 2 or 3 snippet files if you need to.
 7. .md files
    1.  Comprehensive cheat sheet you can access any time without leaving vs code.
    2.  Create a md file, that opens a md renderer along side it.
    3.  If you so choose and depends who wide your monitor is, can create an md file with the cheat sheet and renderer open all at once, with one click. Not gonna lie, the little touches with this extension make it nice to have.
 8.  Drag and Drop 
-   1. Theres no way to actually implement drag and drop as far as I can tell in vscode, but was able to incorporate the next best thing to help quickly move things around without having to dig out the config file.
+   1.  Theres no way to actually implement drag and drop as far as I can tell in vscode, but was able to incorporate the next best thing to help quickly move things around without having to dig out the config file.
    2.  With saying that, your more than welcome to do that too.
 9.  Config file
    1.  Speaking of which, super easy config file editing, updates as you save in real time.
    2.  Exports straight to your projects root.
    3.  Importing makes it easy to update config or send to friends if they like they way you set yours up.
+   4.  Automatically deletes trailing commas on import
 10. Reveal in explorer
 11. Copy path
 12. All the while, its pretty quick. Considering some extensions just seem to bog vscode down.
@@ -74,7 +80,18 @@ V. [Roadmap](#roadmap)
     3.  Mass edit file names and/or extensions
     4.  Save and filenames will be updated
     5.  Note: currently only saves when you click the save button that appears in the toast, working on getting save on close and on save close file
-14. Along with whatever else you can think of... 
+14. Modern day formatter
+    1.  Whether your brand new or a seasoned user, using and configuring your new formatter will be a breeze.
+    2.  You will not have to visit another site or do a google search to make sure the option your about to activate does, what you think it does.
+    3.  Configurations open in web view, the types will be selectable with tabs, under each tab you view the options, read the description and configure the formatter to be exactly the way you want. 
+    4.  I've never seen this else where, but I really wanted it when I was configuring my formatters... and never had it.
+    5.  Live preview to see what your changes do in real time. So if this is your second day coding, you can easily configure without having to do mountais of research.
+    6.  Right click anywhere in the file and select the extensions formatter to activate.
+15. Comment json files
+    1.  Gives you the ability
+    2.  already built and tested just want to fix another features before 
+16. 
+17. Along with whatever else you can think of... 
 
 > [!NOTE]
 > If you see any commands missing from the list, hit me up. That goes for the same markdown styling. Ive noticed not all styling formats work on github, Im not experienced enough with md to know the reasons behind that. For now, Ill only include ones that work on github, but send them to me anyways as I may change my mind. Include a note at the bottom, stating where it works or something. Feature suggestions are welcome as well, whether that be on new features or improving current ones.  
@@ -363,15 +380,15 @@ V. [Roadmap](#roadmap)
 
 ##### FILES
 
-| Command | Description | Shortcut |
-|---------|-------------|----------|
-| `Add to CRM Navigator` | Add current file to navigation | Right-click item |
-| `Batch Add to CRM Navigator` | Select as many files as you want, the label/name of the file will be taken from the file name without the extension. You pick where you want them by selecting a folder, and all selected files will be saved. | Right-click item |
-| `Edit Label` | Change displayed name for file | Right-click item |
-| `Moving Files` | Move files to another folder. Theres no drag and drop avaialble, so this is the next best thing. |  In extension pane, right click, select move item. Right click on the destination folder, select as move destination.|
-| `Remove File` | Delete item from navigation | Right-click item |
-| `Copy Path` | Copy full file path to clipboard | Right-click item |
-| `Reveal in Explorer` | Show file in system file explorer | Available by inline and right-click item. |
+| Command                      | Description                                                                                                                                                                                                    | Shortcut                                                                                                             |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `Add to CRM Navigator`       | Add current file to navigation                                                                                                                                                                                 | Right-click item                                                                                                     |
+| `Batch Add to CRM Navigator` | Select as many files as you want, the label/name of the file will be taken from the file name without the extension. You pick where you want them by selecting a folder, and all selected files will be saved. | Right-click item                                                                                                     |
+| `Edit Label`                 | Change displayed name for file                                                                                                                                                                                 | Right-click item                                                                                                     |
+| `Moving Files`               | Move files to another folder. Theres no drag and drop avaialble, so this is the next best thing.                                                                                                               | In extension pane, right click, select move item. Right click on the destination folder, select as move destination. |
+| `Remove File`                | Delete item from navigation                                                                                                                                                                                    | Right-click item                                                                                                     |
+| `Copy Path`                  | Copy full file path to clipboard                                                                                                                                                                               | Right-click item                                                                                                     |
+| `Reveal in Explorer`         | Show file in system file explorer                                                                                                                                                                              | Available by inline and right-click item.                                                                            |
 
 
 > [!NOTE]
@@ -380,14 +397,14 @@ V. [Roadmap](#roadmap)
 
 ##### .MD
 
-| Command | Description | Shortcut |
-|---------|-------------|----------|
-| `Add md` | Creates two windows, one for code editing. The other for rendering the md file. | Dropdown menu  |
-| `Add md With Cheat Sheet` | Creates three windows, one for code editing.  he other for rendering the md file. Also opens a third pane with a comprehensive cheet sheet, for all you cheaters. | Dropdown menu   |
-| `Edit md Label` | Change displayed name for file | Right-click item |
-| `Edit md` | Creates two windows, one for code editing. The other for rendering the md file. | Right-click item |
-| `Remove md` | Delete item from navigation | Right-click item |
-| `Show md Cheat Sheet` | Comprehensive cheat sheet | Dropdown menu |
+| Command                   | Description                                                                                                                                                       | Shortcut         |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
+| `Add md`                  | Creates two windows, one for code editing. The other for rendering the md file.                                                                                   | Dropdown menu    |
+| `Add md With Cheat Sheet` | Creates three windows, one for code editing.  he other for rendering the md file. Also opens a third pane with a comprehensive cheet sheet, for all you cheaters. | Dropdown menu    |
+| `Edit md Label`           | Change displayed name for file                                                                                                                                    | Right-click item |
+| `Edit md`                 | Creates two windows, one for code editing. The other for rendering the md file.                                                                                   | Right-click item |
+| `Remove md`               | Delete item from navigation                                                                                                                                       | Right-click item |
+| `Show md Cheat Sheet`     | Comprehensive cheat sheet                                                                                                                                         | Dropdown menu    |
 
 > [!NOTE]
 > When adding md files, they will be added in a folder in your .vscode for storage, but can be organized any way you want in the extension. This keeps your root directory looking clean, while giving you the organization you need. While at the same time you can retrieve those files painless at anytime.
@@ -395,22 +412,22 @@ V. [Roadmap](#roadmap)
 
 ##### SNIPPETS
 
-| Command | Description | Shortcut |
-|---------|-------------|----------|
-| `Add Snippet` | Create new grouping |  Dropdown menu.   |
-| `Edit Snippet` | Change category name | Right-click item |
-| `Remove Snippet` | Reorder category position | Right-click item |
-| `Copy Snippet` |  From the folder pane right clight to copy without having to open it | Right-click item |
-| `Remove Snippet` | Reorder category position | Right-click item |
+| Command          | Description                                                         | Shortcut         |
+| ---------------- | ------------------------------------------------------------------- | ---------------- |
+| `Add Snippet`    | Create new grouping                                                 | Dropdown menu.   |
+| `Edit Snippet`   | Change category name                                                | Right-click item |
+| `Remove Snippet` | Reorder category position                                           | Right-click item |
+| `Copy Snippet`   | From the folder pane right clight to copy without having to open it | Right-click item |
+| `Remove Snippet` | Reorder category position                                           | Right-click item |
 
 
 ##### FOLDERS
 
-| Command | Description | Shortcut |
-|---------|-------------|----------|
-| `Add Folder` | Add folders to nav directory |Dropdown menu. |
-| `Add Sub-Folder` | Add sub-folders to nav directory | Right-click item |
-| `Expand / Collapse Sub/Folder` | Set default value for folder | Right-click item|
+| Command                        | Description                      | Shortcut         |
+| ------------------------------ | -------------------------------- | ---------------- |
+| `Add Folder`                   | Add folders to nav directory     | Dropdown menu.   |
+| `Add Sub-Folder`               | Add sub-folders to nav directory | Right-click item |
+| `Expand / Collapse Sub/Folder` | Set default value for folder     | Right-click item |
 
 > [!NOTE]
 > Same as files above. Folders only go 2 deep. Didn't see the point of going further than that kinda defeats the purpose of this. With the thought in mind, first level are most used items you need, while the collapsed folders are the second most used, and the subfolder being the third. Each folder and be set to open expanded or collapsed as default.
@@ -418,40 +435,40 @@ V. [Roadmap](#roadmap)
 
 ##### URLS
 
-| Command | Description | Shortcut |
-|---------|-------------|----------|
-| `Add URL` | Adds navigable link, taking you straight to the website | Dropdown menu. |
-| `Edit URL` | Edit http url |Right-click item |
-| `Remove URL` | Removes from extension | Right-click item |
+| Command      | Description                                             | Shortcut         |
+| ------------ | ------------------------------------------------------- | ---------------- |
+| `Add URL`    | Adds navigable link, taking you straight to the website | Dropdown menu.   |
+| `Edit URL`   | Edit http url                                           | Right-click item |
+| `Remove URL` | Removes from extension                                  | Right-click item |
 
 ##### COMMANDS
 
-| Command | Description | Shortcut |
-|---------|-------------|----------|
-| `Add Command` | Adds button to run vs code commands |Dropdown menu. |
-| `Remove Command` | removes from extension | Right-click item |
-| `Edit Command` | Allows you to edit the cmd | Right-click item |
-| `Show VSCodes Commands Reference` | Cheat shet with over 100+ commands | Dropdown menu. |
+| Command                           | Description                         | Shortcut         |
+| --------------------------------- | ----------------------------------- | ---------------- |
+| `Add Command`                     | Adds button to run vs code commands | Dropdown menu.   |
+| `Remove Command`                  | removes from extension              | Right-click item |
+| `Edit Command`                    | Allows you to edit the cmd          | Right-click item |
+| `Show VSCodes Commands Reference` | Cheat shet with over 100+ commands  | Dropdown menu.   |
 
 ##### CONFIG
 
-| Command | Description | Shortcut |
-|---------|-------------|----------|
-| `Edit Config` | Opens and edits the config file, updates in real time as you save | Dropdown menu. |
-| `Import Config` | Import to make changes | Dropdown menu. |
-| `Export Config` | Export config to share back up |Dropdown menu. |
+| Command         | Description                                                       | Shortcut       |
+| --------------- | ----------------------------------------------------------------- | -------------- |
+| `Edit Config`   | Opens and edits the config file, updates in real time as you save | Dropdown menu. |
+| `Import Config` | Import to make changes                                            | Dropdown menu. |
+| `Export Config` | Export config to share back up                                    | Dropdown menu. |
 
 ##### OTHER
 
-| Command | Description | Shortcut |
-|---------|-------------|----------|
+| Command             | Description                                               | Shortcut         |
+| ------------------- | --------------------------------------------------------- | ---------------- |
 | `Refresh Navigator` | Refreshes the pane, loading directly from the config file | Right-click item |
-| `Collapse All` | Collapses all folders | Right-click item |
+| `Collapse All`      | Collapses all folders                                     | Right-click item |
 
 ##### FUNCTION OUTSIDE PANE
 
-| Command | Description | Shortcut |
-|---------|-------------|----------|
+| Command        | Description                                                                                              | Shortcut          |
+| -------------- | -------------------------------------------------------------------------------------------------------- | ----------------- |
 | `Batch Rename` | Select file/s in the vscode explorer pane and open a .txt file to mass edit file names and/or extensions | right-click item. |
 
 > [!NOTE]
@@ -461,22 +478,43 @@ V. [Roadmap](#roadmap)
 
 ## Roadmap
 
+
+
 <details closed>
 <summary>Details...</summary>
 
+-- i want the same for the md viewer but except snippets it will be md files
+
+
 1. Need to include more markdown examples. ie, accordian ( check other readmes for others)
 2. SEARCH bar at the top for even quickr access or search for soemthing you know is there but dont remember where alot
-4. rename snippet
-5.  edit web url label
-6.  edit label terminal comands
-7.  edit cmd terminal commands
-8.  edit command label
-8.  edit snipptt label
-8.  edit powershel label
-9.  delte powershel 
+4. rename snippet 
+5. snippet viewer ***done***
+6. edit web url label ***done***
+7. edit label terminal comands ***done***
+8. edit cmd terminal commands ***done***
+9. edit command label ***done***
+10. edit powershel label ***done***
+11. delete powershel ***done***
+12. when save or importing config file, check for trailing comma if there ***done***
+13. editeable folder icons
+14. add a snippet viewer instead of this horse shit  ***done***
+15. have the commands search search thrgouh all commands not just that dropdowns selectio0n in the vscode comamnd page
+16. for quick painless md file import into the extension the .md folder is where all of the md files end up so you can click add, it will oipen the windows file explorer to choose a number of files, it wil ask you for a folder to select in the extensions filing system in vs code, and then add all the md files names into our config file and copy each file over to the .md folder 
+17. in the vs coode commands web viewer add a second button to add to extensions filing structure under VS Code
+18. Share Config File button, ask if they want to share md files, ask if they want to share snippets, ask if the want to share urls, ask if they want to share virtual files. If no to any of them, delete corresponding items, then copy into a newly created folder called share me in the root folder, depending on their answer to the questions the snippets file in the .vscode folder, the md folder and the compoents folder along with the config file with creating a .txt file named read me tell the person they are sharing with copy the folders in .vscode and uplaod the confiog in the extenstion
+19. project specific structure, once a project opens, check to see if current project matches the currently loaded one
+20. json comments
+21. remove all comments
+22. right click .md file in editor to view render since the one u already use sucks ass, not to mention they high jack your styling... like why... i dont want to see your shit color pallete
+23. theme builder
 
 </details>
 
+```javascript
+
+
+```
 
 ### Development
 
