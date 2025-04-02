@@ -701,7 +701,7 @@ export function getSnippetsWebviewContent(webview: vscode.Webview, snippets: Rec
                     noResults.style.display = 'none';
                     snippetContent.style.display = 'block';
                     
-                    snippetContent.innerHTML = `
+                    snippetContent.innerHTML = \`
         < div class="snippet-card" >
                             <div class="snippet-header">
                                 <div>
@@ -729,7 +729,7 @@ export function getSnippetsWebviewContent(webview: vscode.Webview, snippets: Rec
                                 </button>
                             </div>
                         </div >
-        `;
+        \`;
                     
                     // Add event listeners to snippet content
                     const copyButton = snippetContent.querySelector('.copy-button');

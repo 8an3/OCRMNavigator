@@ -1,39 +1,127 @@
 export const config = {
     "categories": [
         {
-            "label": "CMDS",
+            "label": "APPS",
+            "expanded": false,
             "type": "folder",
+            "items": []
+          },
+          {
+            "label": "CMDS",
             "expanded": true,
+            "type": "folder",
             "items": [
-                {
-                    "label": "VSCode Commands Reference",
-                    "path": "command:ocrmnavigator.showCommandsReference",
+              {
+                "label": "toggle terminal",
+                "path": "workbench.action.terminal.toggleTerminal",
+                "type": "command",
+                "collapsibleState": 0,
+                "filePath": ""
+              },
+              {
+                "label": "format",
+                "path": "editor.action.formatDocument",
+                "type": "command"
+              },
+              {
+                "label": "save all",
+                "path": "workbench.action.files.saveAll",
+                "type": "command"
+              },
+              {
+                "label": "fold 1",
+                "path": "editor.foldLevel1",
+                "type": "command"
+              },
+              {
+                "label": "fold 2",
+                "path": "editor.foldLevel2",
+                "type": "command"
+              },
+              {
+                "label": "fold 3",
+                "path": "editor.foldLevel3",
+                "type": "command"
+              },
+              {
+                "label": "+ vscode cmds",
+                "type": "folder",
+                "expanded": false,
+                "items": [
+                  {
+                    "label": "fold 4",
+                    "path": "editor.foldLevel4",
                     "type": "command"
-                },
-                {
-                    "label": "Formatting",
-                    "type": "folder",
-                    "items": [
-                        {
-                            "label": "Format Document",
-                            "cmd": "editor.action.formatDocument",
-                            "type": "command"
-                        }
-                    ]
-                },
-                {
-                    "label": "Folding",
-                    "type": "folder",
-                    "items": [
-                        {
-                            "label": "Fold Level 1",
-                            "cmd": "editor.foldLevel1",
-                            "type": "command"
-                        }
-                    ]
-                }
+                  },
+                  {
+                    "label": "fold 5",
+                    "path": "editor.foldLevel5",
+                    "type": "command"
+                  },
+                  {
+                    "label": "fold 6",
+                    "path": "editor.foldLevel6",
+                    "type": "command"
+                  },
+                  {
+                    "label": "fold 7",
+                    "path": "editor.foldLevel7",
+                    "type": "command"
+                  },
+                  {
+                    "label": "unfoldAll",
+                    "path": "editor.unfoldAll",
+                    "type": "command"
+                  },
+                  {
+                    "label": "close all editors",
+                    "path": "workbench.action.closeAllEditors",
+                    "type": "command"
+                  },
+                  {
+                    "label": "toggle word wrap",
+                    "path": "editor.action.toggleWordWrap",
+                    "type": "command"
+                  },
+                  {
+                    "label": "show commands",
+                    "path": "workbench.action.showCommands",
+                    "type": "command"
+                  },
+                  {
+                    "label": "toggle zen mode",
+                    "path": "workbench.action.toggleZenMode",
+                    "type": "command"
+                  }
+                ],
+                "collapsibleState": 1,
+                "filePath": ""
+              },
+              {
+                "label": "term general",
+                "type": "folder",
+                "expanded": false,
+                "items": [
+                  {
+                    "label": "patch current dir",
+                    "path": "git add . && git commit -m \\\"Cleaning w/ push\\\" && git push && pnpm version patch && git push && git push --tags",
+                    "type": "powershellCommand",
+                    "collapsibleState": 0,
+                    "filePath": ""
+                  },
+                  {
+                    "label": "commit and push current dir",
+                    "path": "git add . && git commit -m \"Cleaning w/ push\" && git push",
+                    "type": "powershellCommand",
+                    "collapsibleState": 0,
+                    "filePath": ""
+                  }
+                ],
+                "collapsibleState": 1,
+                "filePath": ""
+              }
             ]
-        },
+          }
         {
             "label": "FILES",
             "expanded": true,

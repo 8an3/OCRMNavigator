@@ -7,11 +7,13 @@ import { getMarkdownGuideContent } from './markdownguid'
 import { getCommandsWebviewContent } from './getCommandsWebviewContent';
 import { selectFolder as selectFolderImport } from './selectFolder'
 import { updateFolderExpansion } from './updateFolderExpansion';
+import { getFormatterConfig } from './formatters';
+import { executeTerminalCommand } from './executeTerminalCommand';
 
 export function registerCommands(context:any, dependencies: any) {
     const { vscode, itemToMove, workspaceRoot, configPath, navigatorProvider } = dependencies;
         // DRAG AND DROP 
-        vscode.commands.registerCommand('ocrmnavigator.moveItem', (item: NavigatorItem) => { itemToMove = item; vscode.window.showInformationMessage(`Selected "${item.label}" to move. Now select destination folder.`); }),
+   const  moveItem =     vscode.commands.registerCommand('ocrmnavigator.moveItem', (item: NavigatorItem) => { itemToMove = item; vscode.window.showInformationMessage(`Selected "${item.label}" to move. Now select destination folder.`); }),
         vscode.commands.registerCommand('ocrmnavigator.setMoveTarget', async (parentItem: NavigatorItem) => {
             if (!itemToMove) { vscode.window.showErrorMessage('No item selected to move'); return; }
             const item = itemToMove;
@@ -77,7 +79,7 @@ export function registerCommands(context:any, dependencies: any) {
                     `Failed to move item: ${error instanceof Error ? error.message : String(error)}`
                 );
             }
-        }),
+        })
 
 
         // CONFIG
@@ -100,7 +102,7 @@ export function registerCommands(context:any, dependencies: any) {
                 const doc = await vscode.workspace.openTextDocument(targetPath);
                 await vscode.window.showTextDocument(doc);
             } catch (error) { vscode.window.showErrorMessage(`Export failed: ${error instanceof Error ? error.message : String(error)}`); }
-        }),
+        })
         vscode.commands.registerCommand('ocrmnavigator.importConfig', async () => {
             try {
                 const fileUris = await vscode.window.showOpenDialog({
@@ -139,7 +141,7 @@ export function registerCommands(context:any, dependencies: any) {
             } catch (error) {
                 vscode.window.showErrorMessage(`Import failed: ${error instanceof Error ? error.message : String(error)}`);
             }
-        }),
+        })
         vscode.commands.registerCommand('ocrmnavigator.editConfig', async () => {
             try {
                 // Ensure config file exists
@@ -164,18 +166,18 @@ export function registerCommands(context:any, dependencies: any) {
             } catch (error) {
                 vscode.window.showErrorMessage(`Failed to edit config: ${error instanceof Error ? error.message : String(error)}`);
             }
-        }),
+        })
 
 
         // REFRESH
         vscode.commands.registerCommand('ocrmnavigator.refreshNavigator', () => {
             vscode.commands.executeCommand('ocrmnavigator.refresh');
             vscode.window.showInformationMessage('Navigator refreshed');
-        }),
+        })
         vscode.commands.registerCommand('ocrmnavigator.refresh', () => {
             navigatorProvider.refresh();
             navigatorProvider.loadConfig();
-        }),
+        })
 
 
         // FILE
@@ -185,14 +187,14 @@ export function registerCommands(context:any, dependencies: any) {
             } else {
                 vscode.commands.executeCommand('ocrmnavigator.addFileToNavigator', fileUri);
             }
-        }),
+        })
         vscode.commands.registerCommand('ocrmnavigator.revealInExplorer', (item: NavigatorItem) => {
             vscode.commands.executeCommand('revealFileInOS', vscode.Uri.file(item.filePath));
-        }),
+        })
         vscode.commands.registerCommand('ocrmnavigator.copyPath', (item: NavigatorItem) => {
             vscode.env.clipboard.writeText(item.filePath);
             vscode.window.showInformationMessage('Path copied to clipboard');
-        }),
+        })
         vscode.commands.registerCommand('ocrmnavigator.addFileToNavigator', async (fileUri: vscode.Uri) => {
             try {
                 // If no URI was provided, try to get currently active file
@@ -270,8 +272,7 @@ export function registerCommands(context:any, dependencies: any) {
             } catch (error) {
                 vscode.window.showErrorMessage(`Failed to add file: ${error instanceof Error ? error.message : String(error)}`);
             }
-        }),
-
+        })
         vscode.commands.registerCommand('ocrmnavigator.editFileLabel', async (item: NavigatorItem) => {
             if (!item) { return; }
             if (item.type === 'snippet' || item.type === 'md') { return; }
@@ -324,7 +325,7 @@ export function registerCommands(context:any, dependencies: any) {
             } catch (error) {
                 vscode.window.showErrorMessage(`Failed to rename file: ${error instanceof Error ? error.message : String(error)}`);
             }
-        }),
+        })
         vscode.commands.registerCommand('ocrmnavigator.deleteItem', async (item: NavigatorItem) => {
             if (!item) { return; }
             if (item.type !== 'snippet' && item.type !== 'md' && item.type !== 'folder') { return; }
@@ -383,7 +384,7 @@ export function registerCommands(context:any, dependencies: any) {
                     `Failed to remove item: ${error instanceof Error ? error.message : String(error)}`
                 );
             }
-        }),
+        })
         vscode.commands.registerCommand('ocrmnavigator.moveFileUp', async (item: NavigatorItem) => {
             try {
                 // Load the current configuration
@@ -418,7 +419,7 @@ export function registerCommands(context:any, dependencies: any) {
             } catch (error) {
                 vscode.window.showErrorMessage(`Failed to move file up: ${error instanceof Error ? error.message : String(error)}`);
             }
-        }),
+        })
         vscode.commands.registerCommand('ocrmnavigator.moveFileDown', async (item: NavigatorItem) => {
             try {
                 // Load the current configuration
@@ -454,7 +455,7 @@ export function registerCommands(context:any, dependencies: any) {
             } catch (error) {
                 vscode.window.showErrorMessage(`Failed to move file down: ${error instanceof Error ? error.message : String(error)}`);
             }
-        }),
+        })
         vscode.commands.registerCommand('ocrmnavigator.addFileToSelectedFolder', async (folderItem: NavigatorItem, fileUri?: vscode.Uri) => {
             try {
                 // Verify we have a folder
@@ -573,7 +574,7 @@ export function registerCommands(context:any, dependencies: any) {
             } catch (error) {
                 vscode.window.showErrorMessage(`Failed to add file: ${error instanceof Error ? error.message : String(error)}`);
             }
-        }),
+        })
         vscode.commands.registerCommand('ocrmnavigator.renameBatch', async (uri: vscode.Uri, selectedUris: vscode.Uri[]) => {
             try {
                 // Handle both single and multi-selection
@@ -733,7 +734,7 @@ export function registerCommands(context:any, dependencies: any) {
                     `Failed to batch rename: ${error instanceof Error ? error.message : String(error)}`
                 );
             }
-        }),
+        })
         vscode.commands.registerCommand('ocrmnavigator.addFilesToNavigator', async (clickedUri: vscode.Uri, selectedUris: vscode.Uri[]) => {
             try {
                 // Debug selections
@@ -793,7 +794,7 @@ export function registerCommands(context:any, dependencies: any) {
             } catch (error) {
                 vscode.window.showErrorMessage(`Failed to add files: ${error instanceof Error ? error.message : String(error)}`);
             }
-        }),
+        })
 
 
         // FOLDERS
@@ -826,7 +827,7 @@ export function registerCommands(context:any, dependencies: any) {
             } catch (error) {
                 vscode.window.showErrorMessage(`Failed to move category: ${error instanceof Error ? error.message : String(error)}`);
             }
-        }),
+        })
         vscode.commands.registerCommand('ocrmnavigator.moveCategoryDown', async (item: NavigatorItem) => {
             if (!item || item.type !== 'folder') {
                 return;
@@ -856,7 +857,7 @@ export function registerCommands(context:any, dependencies: any) {
             } catch (error) {
                 vscode.window.showErrorMessage(`Failed to move category: ${error instanceof Error ? error.message : String(error)}`);
             }
-        }),
+        })
         vscode.commands.registerCommand('ocrmnavigator.addCategory', async () => {
             try {
                 // Ask for category name
@@ -898,7 +899,7 @@ export function registerCommands(context:any, dependencies: any) {
             } catch (error) {
                 vscode.window.showErrorMessage(`Failed to add category: ${error instanceof Error ? error.message : String(error)}`);
             }
-        }),
+        })
         vscode.commands.registerCommand('ocrmnavigator.addSubcategory', async (parentItem: NavigatorItem) => {
             try {
                 if (!parentItem || parentItem.type !== 'folder') {
@@ -945,7 +946,7 @@ export function registerCommands(context:any, dependencies: any) {
                     `Failed to add subcategory: ${error instanceof Error ? error.message : String(error)}`
                 );
             }
-        }),
+        })
         vscode.commands.registerCommand('ocrmnavigator.renameCategory', async (item: NavigatorItem) => {
             if (!item || item.type !== 'folder') {
                 return;
@@ -986,7 +987,7 @@ export function registerCommands(context:any, dependencies: any) {
             } catch (error) {
                 vscode.window.showErrorMessage(`Failed to rename category: ${error instanceof Error ? error.message : String(error)}`);
             }
-        }),
+        })
         vscode.commands.registerCommand('ocrmnavigator.deleteCategory', async (item: NavigatorItem) => {
             if (!item || item.type !== 'folder') {
                 return;
@@ -1032,15 +1033,15 @@ export function registerCommands(context:any, dependencies: any) {
             } catch (error) {
                 vscode.window.showErrorMessage(`Failed to delete category: ${error instanceof Error ? error.message : String(error)}`);
             }
-        }),
+        })
         vscode.commands.registerCommand('ocrmnavigator.collapseFolder', (item: NavigatorItem) => {
             updateFolderExpansion(item, false, vscode);
             vscode.commands.executeCommand('ocrmnavigator.refresh');
-        }),
+        })
         vscode.commands.registerCommand('ocrmnavigator.expandFolder', (item: NavigatorItem) => {
             updateFolderExpansion(item, true, vscode);
             vscode.commands.executeCommand('ocrmnavigator.refresh');
-        }),
+        })
 
 
         // URL
@@ -1096,7 +1097,7 @@ export function registerCommands(context:any, dependencies: any) {
             } catch (error) {
                 vscode.window.showErrorMessage(`Failed to add URL: ${error instanceof Error ? error.message : String(error)}`);
             }
-        }),
+        })
         vscode.commands.registerCommand('ocrmnavigator.editWebUrl', async (item: NavigatorItem) => {
             if (!item || item.type !== 'url') return;
 
@@ -1166,7 +1167,7 @@ export function registerCommands(context:any, dependencies: any) {
             } catch (error) {
                 vscode.window.showErrorMessage(`Failed to edit bookmark: ${error instanceof Error ? error.message : String(error)}`);
             }
-        }),
+        })
         vscode.commands.registerCommand('ocrmnavigator.removeUrl', async (item: NavigatorItem) => {
             try {
                 // Validate the selected item
@@ -1240,7 +1241,7 @@ export function registerCommands(context:any, dependencies: any) {
                     `Failed to remove URL: ${error instanceof Error ? error.message : String(error)}`
                 );
             }
-        }),
+        })
 
 
         // COMMANDS
@@ -1296,7 +1297,7 @@ export function registerCommands(context:any, dependencies: any) {
                     `Failed to add command: ${error instanceof Error ? error.message : String(error)}`
                 );
             }
-        }),
+        })
         vscode.commands.registerCommand('ocrmnavigator.executeCommand', (item: NavigatorItem) => {
             vscode.window.showInformationMessage(`Executing cmd: ${item.filePath}`)
             vscode.commands.executeCommand(item.filePath).then(undefined, err => {
@@ -1304,7 +1305,7 @@ export function registerCommands(context:any, dependencies: any) {
                     `Failed to execute "${item.label}": ${err.message}`
                 );
             });
-        }),
+        })
         vscode.commands.registerCommand('ocrmnavigator.editCommand', async (item: NavigatorItem) => {
             try {
                 // Validate the selected item
@@ -1413,7 +1414,7 @@ export function registerCommands(context:any, dependencies: any) {
                     `Failed to edit command: ${error instanceof Error ? error.message : String(error)}`
                 );
             }
-        }),
+        })
         vscode.commands.registerCommand('ocrmnavigator.showCommandsReference', () => {
             try {
                 // Create and show a new webview panel
@@ -1434,7 +1435,7 @@ export function registerCommands(context:any, dependencies: any) {
                 const errorMessage = error instanceof Error ? error.message : String(error);
                 vscode.window.showErrorMessage(`Failed to show commands reference: ${errorMessage}`);
             }
-        }),
+        })
 
 
         // TERMINAL COMMANDS
@@ -1488,7 +1489,7 @@ export function registerCommands(context:any, dependencies: any) {
                     `Failed to add terminal command: ${error instanceof Error ? error.message : String(error)}`
                 );
             }
-        }),
+        })
         vscode.commands.registerCommand('ocrmnavigator.executeItem', (item: NavigatorItem) => {
             if (!item) return;
 
@@ -1520,7 +1521,7 @@ export function registerCommands(context:any, dependencies: any) {
 
                 // Other types you may have
             }
-        }),
+        })
 
 
         // SNIPPETS
@@ -1629,7 +1630,7 @@ export function registerCommands(context:any, dependencies: any) {
                     `Failed to create snippet: ${error instanceof Error ? error.message : String(error)}`
                 );
             }
-        }),
+        })
         vscode.commands.registerCommand('ocrmnavigator.deleteSnippet', async (item: NavigatorItem) => {
             try {
                 if (!item || item.type === 'snippet') {
@@ -1679,7 +1680,7 @@ export function registerCommands(context:any, dependencies: any) {
                     `Failed to delete snippet: ${error instanceof Error ? error.message : String(error)}`
                 );
             }
-        }),
+        })
         vscode.commands.registerCommand('ocrmnavigator.editSnippet', async (item: NavigatorItem) => {
             try {
                 if (!workspaceRoot) {
@@ -1797,7 +1798,7 @@ export function registerCommands(context:any, dependencies: any) {
                 const errorMessage = error instanceof Error ? error.message : String(error);
                 vscode.window.showErrorMessage(`Failed to edit snippet: ${errorMessage}`);
             }
-        }),
+        })
         vscode.commands.registerCommand('ocrmnavigator.copySnippetToClipboard', async (item: NavigatorItem) => {
             try {
                 if (!workspaceRoot) {
@@ -1859,7 +1860,7 @@ export function registerCommands(context:any, dependencies: any) {
                     `Failed to copy snippet: ${error instanceof Error ? error.message : String(error)}`
                 );
             }
-        }),
+        })
 
 
         // MD
@@ -1941,7 +1942,7 @@ export function registerCommands(context:any, dependencies: any) {
                     `Failed to create snippet: ${error instanceof Error ? error.message : String(error)}`
                 );
             }
-        }),
+        })
         vscode.commands.registerCommand('ocrmnavigator.createMDWCheat', async (parentItem?: NavigatorItem) => {
             try {
                 // Validate workspace
@@ -2049,7 +2050,7 @@ export function registerCommands(context:any, dependencies: any) {
                     `Failed to create snippet with cheat sheet: ${error instanceof Error ? error.message : String(error)}`
                 );
             }
-        }),
+        })
         vscode.commands.registerCommand('ocrmnavigator.editMDLabel', async (parentItem?: NavigatorItem) => {
             if (!parentItem || parentItem.type !== 'md') {
                 vscode.window.showErrorMessage('Please select a Markdown file to edit');
@@ -2101,7 +2102,7 @@ export function registerCommands(context:any, dependencies: any) {
                     `Failed to edit label: ${error instanceof Error ? error.message : String(error)}`
                 );
             }
-        }),
+        })
         vscode.commands.registerCommand('ocrmnavigator.removeMD', async (parentItem?: NavigatorItem) => {
             if (!parentItem || parentItem.type !== 'md') {
                 vscode.window.showErrorMessage('Please select a Markdown file to remove');
@@ -2149,7 +2150,7 @@ export function registerCommands(context:any, dependencies: any) {
                     `Failed to remove MD file: ${error instanceof Error ? error.message : String(error)}`
                 );
             }
-        }),
+        })
         vscode.commands.registerCommand('ocrmnavigator.editMD', async (parentItem?: NavigatorItem) => {
             try {
                 // Validate selection
@@ -2184,7 +2185,7 @@ export function registerCommands(context:any, dependencies: any) {
                     `Failed to edit Markdown file: ${error instanceof Error ? error.message : String(error)}`
                 );
             }
-        }),
+        })
         vscode.commands.registerCommand('ocrmnavigator.viewMarkdownGuide', () => {
             try {
                 // Create and show a new webview panel
@@ -2204,8 +2205,9 @@ export function registerCommands(context:any, dependencies: any) {
                 const errorMessage = error instanceof Error ? error.message : String(error);
                 vscode.window.showErrorMessage(`Failed to show Markdown guide: ${errorMessage}`);
             }
-        }),
-
+        })
+        
+    
 
         // FORMATTER 
         // Register the command to format the current file
@@ -2244,7 +2246,7 @@ export function registerCommands(context:any, dependencies: any) {
             } catch (error) {
                 vscode.window.showErrorMessage(`Format failed: ${error instanceof Error ? error.message : String(error)}`);
             }
-        }),
+        })
         vscode.commands.registerCommand('ocrmnavigator.configureFormatters', async () => {
             try {
                 const panel = vscode.window.createWebviewPanel(
@@ -2277,7 +2279,7 @@ export function registerCommands(context:any, dependencies: any) {
             } catch (error) {
                 vscode.window.showErrorMessage(`Failed to open formatter configuration: ${error instanceof Error ? error.message : String(error)}`);
             }
-        }),
+        })
 
 
         // no longer in use
